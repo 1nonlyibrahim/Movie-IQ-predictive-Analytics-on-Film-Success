@@ -33,14 +33,15 @@ else:
 
 if uploaded_file is not None:
     #Check Required Columns--------------------------------------------------------------------------------------
-    required_columns = [
-        "budget",
-        "revenue",
-        "genres",
-        "popularity",
-        "runtime",
-        "vote_average"
-    ]
+    with st.sidebar:
+        required_columns = [
+            "budget",
+            "revenue",
+            "genres",
+            "popularity",
+            "runtime",
+            "vote_average"
+        ]
     missing_columns = [
         col
         for col in required_columns
