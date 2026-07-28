@@ -10,7 +10,6 @@ st.set_page_config(
 )
 st.title("Movie IQ: Film Success Predictor")
 
-with st.sidebar:
     st.markdown("Analyze and explore your movie dataset instantly.")
 
     uploaded_file = st.file_uploader(
