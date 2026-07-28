@@ -37,13 +37,6 @@ if uploaded_file is not None:
     df = st.session_state.df
 
     with st.sidebar:
-        st.title("Data Cleaner")
-        req = ["budget", "revenue", "genres", "popularity", "runtime", "vote_average"]
-        miss_cols = [c for c in req if c not in df.columns]
-        if miss_cols:
-            st.error(f"Missing columns: {', '.join(miss_cols)}")
-            st.stop()
-
         miss = df.isnull().sum()
         miss = miss[miss > 0]
 
@@ -85,31 +78,27 @@ if uploaded_file is not None:
         else:
             st.success("✨ No missing values!")
 
-    st.title("Dataset Dashboard")
-    st.write("### Current Data Frame")
-    st.dataframe(st.session_state.df)
+        df = st.session_state.df
+        st.header("Duplicate Value Check")
+        dupes = df[df.duplicated(keep=False)]
 
-    df = st.session_state.df
-    st.header("🔁 Duplicate Value Check")
-    dupes = df[df.duplicated(keep=False)]
+        if dupes.empty:
+            st.success("✅ No duplicate rows found.")
+        else:
+            st.warning(f"⚠️ {dupes.shape[0]} duplicate rows detected.")
+            st.dataframe(dupes, use_container_width=True)
+            opt = st.radio("Handle duplicates:", ["Keep All", "Remove All", "Manually Edit"])
 
-    if dupes.empty:
-        st.success("✅ No duplicate rows found.")
-    else:
-        st.warning(f"⚠️ {dupes.shape[0]} duplicate rows detected.")
-        st.dataframe(dupes, use_container_width=True)
-        opt = st.radio("Handle duplicates:", ["Keep All", "Remove All", "Manually Edit"])
-
-        if opt == "Remove All":
-            before = len(df)
-            st.session_state.df = df.drop_duplicates().reset_index(drop=True)
-            st.success(f"✅ {before - len(st.session_state.df)} rows removed.")
-            st.rerun()
-        elif opt == "Manually Edit":
-            st.info("Edit rows manually below.")
-            st.session_state.df = st.data_editor(df, use_container_width=True, num_rows="dynamic")
-        elif opt == "Keep All":
-            st.info("Duplicate rows kept.")
+            if opt == "Remove All":
+                before = len(df)
+                st.session_state.df = df.drop_duplicates().reset_index(drop=True)
+                st.success(f"✅ {before - len(st.session_state.df)} rows removed.")
+                st.rerun()
+            elif opt == "Manually Edit":
+                st.info("Edit rows manually below.")
+                st.session_state.df = st.data_editor(df, use_container_width=True, num_rows="dynamic")
+            elif opt == "Keep All":
+                st.info("Duplicate rows kept.")
 
 else:
     st.session_state.u = False
