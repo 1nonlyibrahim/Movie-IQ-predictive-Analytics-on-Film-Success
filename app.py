@@ -25,8 +25,10 @@ if uploaded_file is not None:
     if not st.session_state.u:
         pop("✅ Dataset uploaded successfully!")
         st.session_state.u = True
+
 else:
     st.session_state.u = False
+    st.info("Please upload a CSV file to begin.") 
 
 
 #Check Required Columns--------------------------------------------------------------------------------------
