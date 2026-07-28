@@ -28,9 +28,10 @@ if uploaded_file is not None:
 
 else:
     st.session_state.u = False
-    st.info("Please upload a CSV file to begin.") 
+    st.info("Please upload a CSV file to begin.")
+    st.stop()
 
-if col not in df.columns:
+if uploaded_file is not None:
     #Check Required Columns--------------------------------------------------------------------------------------
     required_columns = [
         "budget",
