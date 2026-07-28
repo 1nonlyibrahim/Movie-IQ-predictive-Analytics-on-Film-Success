@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
+import time
 
 
 #Add File Upload---------------------------------------------------------------------------------------------
 st.set_page_config(
     page_title="MovieIQ",
     page_icon="🎬",
-    layout="wide"
+    layout="centered"
 )
 
 st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h1>", unsafe_allow_html=True)
@@ -18,4 +19,4 @@ def pop(m):
 
 if "u" not in st.session_state: st.session_state.u = False
 
-uploaded_file = st.file_uploader("Upload your movie dataset", type=["csv"])
+dataset = st.file_uploader("Upload your movie dataset", type=["csv"])
