@@ -8,21 +8,19 @@ st.set_page_config(
     page_icon="🎬",
     layout="wide"
 )
+
 st.title("Movie IQ: Film Success Predictor")
+st.markdown("Analyze and explore your movie dataset instantly.")
 
-    st.markdown("Analyze and explore your movie dataset instantly.")
-
-    uploaded_file = st.file_uploader(
+uploaded_file = st.file_uploader(
     "Upload your movie dataset",
     type=["csv"]
     )
 
-    if uploaded_file is not None:
+if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
         st.success("Dataset uploaded successfully!")
-
-    st.subheader("Dataset Preview")
 
 
 #Check Required Columns--------------------------------------------------------------------------------------
