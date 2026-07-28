@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.markdown("<h1 style='text-align: center;'>Movie IQ: Film Success Predictor</h1>", unsafe_html=True)
+st.markdown("<h1 style='text-align: center;'>Movie IQ: Film Success Predictor</h1>", unsafe_allow_html=True)
 
 st.markdown("Analyze and explore your movie dataset instantly.")
 
