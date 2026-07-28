@@ -28,9 +28,7 @@ if uploaded_file is not None:
         pop("✅ Dataset uploaded successfully!")
         st.session_state.u = True
 
-else:
-    st.session_state.u = False
-    st.info("Please upload a CSV file to begin.")
+# End of file
     st.stop()
 
 if uploaded_file is not None:
@@ -51,121 +49,161 @@ if uploaded_file is not None:
             st.error(f"Missing required columns: {', '.join(missing_columns)}")
             st.stop()
 
-        # Check Missing Values
-        missing = st.session_state.df.isnull().sum()
-        missing = missing[missing > 0]
+        missing = df.isnull().sum()
+    missing = missing[missing > 0]
 
-        if len(missing) > 0:
-            st.subheader("Missing Values Found")
-            st.dataframe(missing)
+    if len(missing) > 0:
+        st.subheader("Missing Values Found")
+        st.dataframe(missing)
 
-            action = st.radio(
-                "Select how to handle missing data:",
-                ["Fill Manually", "Delete Selected Columns", "Delete All Missing (Rows)"],
-            )
-
-            if action == "Fill Manually":
-                selected_col = st.selectbox("Select column to fill:", missing.index.tolist())
-                fill_value = st.text_input(f"Enter value to replace NaN in '{selected_col}':")
-
-                if st.button("Apply Manual Fill"):
-                    if fill_value:
-                        try:
-                            fill_value = float(fill_value) if "." in fill_value else int(fill_value)
-                        except ValueError:
-                            pass
-                        st.session_state.df[selected_col] = st.session_state.df[selected_col].fillna(fill_value)
-                        st.success(f"Filled missing values in {selected_col}!")
-                        st.experimental_rerun()
-
-            elif action == "Delete Selected Columns":
-                cols_to_delete = st.multiselect("Select columns to completely remove:", missing.index.tolist())
-                if st.button("Delete Selected Columns"):
-                    if cols_to_delete:
-                        st.session_state.df = st.session_state.df.drop(columns=cols_to_delete)
-                        st.success(f"Deleted columns: {', '.join(cols_to_delete)}")
-                        st.experimental_rerun()
-
-            elif action == "Delete All Missing (Rows)":
-                st.warning("This deletes any row containing a missing value.")
-                if st.button("Confirm Row Deletion"):
-                    st.session_state.df = st.session_state.df.dropna()
-                    st.success("Successfully dropped rows with missing values!")
-                    st.experimental_rerun()
-
-        else:
-            st.success("✨ No missing values detected in the dataset!")
-
-        # --- Main App Body ---
-        st.title("Dataset Dashboard")
-        st.write("### Current Data Frame")
-        st.dataframe(st.session_state.df)
-
-
-
-    # Duplicate Value Detection-----------------------------------------------------------------------------------
-    st.header("🔁 Duplicate Value Check")
-
-    duplicate_rows = df[df.duplicated(keep=False)]
-
-    if duplicate_rows.empty:
-        st.success("✅ No duplicate rows found in the dataset.")
-
-    else:
-        st.warning(f"⚠️ {duplicate_rows.shape[0]} duplicate rows detected.")
-
-        st.subheader("Duplicate Records")
-
-        st.dataframe(duplicate_rows, use_container_width=True)
-
-        option = st.radio(
-            "How would you like to handle duplicate values?",
-            (
-                "Keep All Duplicates",
-                "Remove All Duplicates",
-                "Manually Edit Dataset"
-            )
+        # Updated options focusing on ROWS
+        action = st.radio(
+            "Select how to handle missing data:",
+            [
+                "Fill Individually by Cell",
+                "Delete Selected Rows",
+                "Delete All Missing (Rows)",
+            ],
         )
 
-        # ----------------------------------------
-        # Keep duplicates
-        # ----------------------------------------
-        if option == "Keep All Duplicates":
+        # 1. Fill Individually by Cell
+        if action == "Fill Individually by Cell":
+            # Find the exact coordinates (Row Index, Column) of missing data
+            missing_coordinates = []
+            for col in df.columns:
+                null_indices = df[df[col].isnull()].index.tolist()
+                for idx in null_indices:
+                    missing_coordinates.append(f"Row {idx} -> Column: {col}")
 
-            st.info("Duplicate rows have been kept in the dataset.")
-
-        # ----------------------------------------
-        # Remove duplicates
-        # ----------------------------------------
-        elif option == "Remove All Duplicates":
-
-            before = len(df)
-
-            df = df.drop_duplicates().reset_index(drop=True)
-
-            removed = before - len(df)
-
-            st.success(f"✅ {removed} duplicate rows removed successfully.")
-
-        # ----------------------------------------
-        # Manual editing
-        # ----------------------------------------
-        elif option == "Manually Edit Dataset":
-
-            st.info(
-                "You can edit or delete rows manually below. "
-                "Click any cell to edit it or remove unwanted rows."
+            # Let user select the exact specific cell
+            selected_cell = st.selectbox(
+                "Choose exact missing cell to fill:", missing_coordinates
             )
 
-            edited_df = st.data_editor(
-                df,
-                use_container_width=True,
-                num_rows="dynamic"
+            if selected_cell:
+                # Extract the row index and column name back out of the string
+                parts = selected_cell.split(" -> Column: ")
+                row_idx = int(parts[0].replace("Row ", ""))
+                col_name = parts[1]
+
+                # Text input for the replacement value
+                fill_value = st.text_input(f"Value for Row {row_idx}, {col_name}:")
+
+                if st.button("Apply Cell Fill"):
+                    if fill_value:
+                        # Handle basic number typing
+                        try:
+                            fill_value = (
+                                float(fill_value)
+                                if "." in fill_value
+                                else int(fill_value)
+                            )
+                        except ValueError:
+                            pass
+
+                        # Update the single specific cell precisely
+                        st.session_state.df.at[row_idx, col_name] = fill_value
+                        st.success(f"Updated cell at row {row_idx}!")
+                        st.rerun()
+
+        # 2. Delete Selected Rows
+        elif action == "Delete Selected Rows":
+            # Identify which unique row indexes have at least one NaN
+            rows_with_nan = df[df.isnull().any(axis=1)].index.tolist()
+
+            selected_rows = st.multiselect(
+                "Select specific row indices to delete:",
+                options=rows_with_nan,
+                format_func=lambda x: f"Row index {x}",
             )
 
-            df = edited_df
+            if st.button("Delete Selected Rows"):
+                if selected_rows:
+                    st.session_state.df = st.session_state.df.drop(
+                        index=selected_rows
+                    )
+                    st.success(f"Deleted rows: {selected_rows}")
+                    st.rerun()
 
-            st.success("Changes applied successfully.")
+        # 3. Delete All Missing (Rows)
+        elif action == "Delete All Missing (Rows)":
+            st.warning("This deletes any row containing a missing value.")
+            if st.button("Confirm Row Deletion"):
+                st.session_state.df = st.session_state.df.dropna()
+                st.success("Successfully dropped rows with missing values!")
+                st.rerun()
+
+    else:
+        st.success("✨ No missing values detected in the dataset!")
+
+# --- Main App Body ---
+st.title("Dataset Dashboard")
+st.write("### Current Data Frame")
+st.dataframe(st.session_state.df)
+
+
+
+# Duplicate Value Detection-----------------------------------------------------------------------------------
+st.header("🔁 Duplicate Value Check")
+
+duplicate_rows = st.session_state.df[st.session_state.df.duplicated(keep=False)]
+
+if duplicate_rows.empty:
+    st.success("✅ No duplicate rows found in the dataset.")
+
 else:
+    st.warning(f"⚠️ {duplicate_rows.shape[0]} duplicate rows detected.")
+
+    st.subheader("Duplicate Records")
+
+    st.dataframe(duplicate_rows, use_container_width=True)
+
+    option = st.radio(
+        "How would you like to handle duplicate values?",
+        (
+            "Keep All Duplicates",
+            "Remove All Duplicates",
+            "Manually Edit Dataset"
+        )
+    )
+
+    # ----------------------------------------
+    # Keep duplicates
+    # ----------------------------------------
+    if option == "Keep All Duplicates":
+
+        st.info("Duplicate rows have been kept in the dataset.")
+
+    # ----------------------------------------
+    # Remove duplicates
+    # ----------------------------------------
+    elif option == "Remove All Duplicates":
+
+        before = len(st.session_state.df)
+        st.session_state.df = st.session_state.df.drop_duplicates().reset_index(drop=True)
+        removed = before - len(st.session_state.df)
+
+        st.success(f"✅ {removed} duplicate rows removed successfully.")
+
+    # ----------------------------------------
+    # Manual editing
+    # ----------------------------------------
+    elif option == "Manually Edit Dataset":
+
+        st.info(
+            "You can edit or delete rows manually below. "
+            "Click any cell to edit it or remove unwanted rows."
+        )
+
+        edited_df = st.data_editor(
+            st.session_state.df,
+            use_container_width=True,
+            num_rows="dynamic"
+        )
+
+        st.session_state.df = edited_df
+
+        st.success("Changes applied successfully.")
+if uploaded_file is None:
     st.session_state.u = False
     st.info("Please upload a CSV file to begin.")
