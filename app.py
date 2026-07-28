@@ -27,11 +27,7 @@ dataset = st.file_uploader("Upload a CSV file to begin", type=["csv"])
 if dataset is not None:
     if not st.session_state.uploaded:
         pop("Uploaded dataset successfully!")
-        st.markdown(
-            '<audio autoplay><source src="https://mixkit.co" type="audio/wav"></audio>', 
-            unsafe_allow_html=True
-        )
-        st.session_state.uploaded = True
+        
 else:
     # 3. Reset the tracker if the user clears the file
     st.session_state.uploaded = False
