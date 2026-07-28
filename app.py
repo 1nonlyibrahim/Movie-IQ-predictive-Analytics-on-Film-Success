@@ -28,77 +28,72 @@ if uploaded_file is not None:
         pop("✅ Dataset uploaded successfully!")
         st.session_state.u = True
 
-# End of file
-st.stop()
-
-import streamlit as st
-
+# Continue only if a file was uploaded
 if uploaded_file is not None:
     df = st.session_state.df
 
-    with st.sidebar:
-        miss = df.isnull().sum()
-        miss = miss[miss > 0]
+    miss = df.isnull().sum()
+    miss = miss[miss > 0]
 
-        if not miss.empty:
-            st.subheader("Missing Values Found")
-            st.dataframe(miss)
-            act = st.radio("Handle missing data:", ["Fill Cell", "Delete Selected Rows", "Delete All Missing Rows"])
+    if not miss.empty:
+        st.subheader("Missing Values Found")
+        st.dataframe(miss)
+        act = st.radio("Handle missing data:", ["Fill Cell", "Delete Selected Rows", "Delete All Missing Rows"])
 
-            if act == "Fill Cell":
-                coords = [f"Row {i} -> Column: {c}" for c in df.columns for i in df[df[c].isnull()].index]
-                cell = st.selectbox("Choose missing cell:", coords)
-                if cell:
-                    r_idx = int(cell.split(" -> Column: ")[0].replace("Row ", ""))
-                    c_name = cell.split(" -> Column: ")[1]
-                    val = st.text_input(f"Value for Row {r_idx}, {c_name}:")
-                    if st.button("Apply Fill") and val:
-                        try:
-                            val = float(val) if "." in val else int(val)
-                        except ValueError:
-                            pass
-                        st.session_state.df.at[r_idx, c_name] = val
-                        st.success(f"Updated row {r_idx}!")
-                        st.rerun()
-
-            elif act == "Delete Selected Rows":
-                r_nan = df[df.isnull().any(axis=1)].index.tolist()
-                sel_r = st.multiselect("Select row indices:", r_nan, format_func=lambda x: f"Row {x}")
-                if st.button("Delete Rows") and sel_r:
-                    st.session_state.df = df.drop(index=sel_r)
-                    st.success(f"Deleted rows: {sel_r}")
+        if act == "Fill Cell":
+            coords = [f"Row {i} -> Column: {c}" for c in df.columns for i in df[df[c].isnull()].index]
+            cell = st.selectbox("Choose missing cell:", coords)
+            if cell:
+                r_idx = int(cell.split(" -> Column: ")[0].replace("Row ", ""))
+                c_name = cell.split(" -> Column: ")[1]
+                val = st.text_input(f"Value for Row {r_idx}, {c_name}:")
+                if st.button("Apply Fill") and val:
+                    try:
+                        val = float(val) if "." in val else int(val)
+                    except ValueError:
+                        pass
+                    st.session_state.df.at[r_idx, c_name] = val
+                    st.success(f"Updated row {r_idx}!")
                     st.rerun()
 
-            elif act == "Delete All Missing Rows":
-                st.warning("Deletes any row with a missing value.")
-                if st.button("Confirm Deletion"):
-                    st.session_state.df = df.dropna()
-                    st.success("Dropped rows!")
-                    st.rerun()
-        else:
-            st.success("✨ No missing values!")
-
-        df = st.session_state.df
-        st.header("Duplicate Value Check")
-        dupes = df[df.duplicated(keep=False)]
-
-        if dupes.empty:
-            st.success("✅ No duplicate rows found.")
-        else:
-            st.warning(f"⚠️ {dupes.shape[0]} duplicate rows detected.")
-            st.dataframe(dupes, use_container_width=True)
-            opt = st.radio("Handle duplicates:", ["Keep All", "Remove All", "Manually Edit"])
-
-            if opt == "Remove All":
-                before = len(df)
-                st.session_state.df = df.drop_duplicates().reset_index(drop=True)
-                st.success(f"✅ {before - len(st.session_state.df)} rows removed.")
+        elif act == "Delete Selected Rows":
+            r_nan = df[df.isnull().any(axis=1)].index.tolist()
+            sel_r = st.multiselect("Select row indices:", r_nan, format_func=lambda x: f"Row {x}")
+            if st.button("Delete Rows") and sel_r:
+                st.session_state.df = df.drop(index=sel_r)
+                st.success(f"Deleted rows: {sel_r}")
                 st.rerun()
-            elif opt == "Manually Edit":
-                st.info("Edit rows manually below.")
-                st.session_state.df = st.data_editor(df, use_container_width=True, num_rows="dynamic")
-            elif opt == "Keep All":
-                st.info("Duplicate rows kept.")
+
+        elif act == "Delete All Missing Rows":
+            st.warning("Deletes any row with a missing value.")
+            if st.button("Confirm Deletion"):
+                st.session_state.df = df.dropna()
+                st.success("Dropped rows!")
+                st.rerun()
+    else:
+        st.success("✨ No missing values!")
+
+    df = st.session_state.df
+    st.header("Duplicate Value Check")
+    dupes = df[df.duplicated(keep=False)]
+
+    if dupes.empty:
+        st.success("✅ No duplicate rows found.")
+    else:
+        st.warning(f"⚠️ {dupes.shape[0]} duplicate rows detected.")
+        st.dataframe(dupes, use_container_width=True)
+        opt = st.radio("Handle duplicates:", ["Keep All", "Remove All", "Manually Edit"])
+
+        if opt == "Remove All":
+            before = len(df)
+            st.session_state.df = df.drop_duplicates().reset_index(drop=True)
+            st.success(f"✅ {before - len(st.session_state.df)} rows removed.")
+            st.rerun()
+        elif opt == "Manually Edit":
+            st.info("Edit rows manually below.")
+            st.session_state.df = st.data_editor(df, use_container_width=True, num_rows="dynamic")
+        elif opt == "Keep All":
+            st.info("Duplicate rows kept.")
 
 else:
     st.session_state.u = False
