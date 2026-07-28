@@ -26,8 +26,110 @@ dataset = st.file_uploader("Upload a CSV file to begin", type=["csv"])
 
 if dataset is not None:
     if not st.session_state.uploaded:
-        pop("Uploaded dataset successfully!")
+        pop("dataset Uploaded successfully!")
         
 else:
     # 3. Reset the tracker if the user clears the file
     st.session_state.uploaded = False
+
+#===========================================================================================================================================================================================
+#checking and correcting for any missing values or duplicates values in the dataset
+#===========================================================================================================================================================================================
+@st.dialog("🛠️ Clean Missing Values", width="large")
+def clean_data_modal():
+    # Fetch the dataset from session state
+    df = st.session_state.df_working
+    missing_rows = df[df.isnull().any(axis=1)]
+    
+    st.write("Below are all the rows that contain at least one missing column:")
+    # Task 1: Show complete rows with any missing columns
+    st.dataframe(missing_rows)
+    
+    st.divider()
+    
+    # Task 2: Provide the 3 choices
+    action = st.radio(
+        "Choose an action:",
+        [
+            "1. Select and delete specific rows manually",
+            "2. Fill values (Manually or Automatically)",
+            "3. Delete all columns containing missing values"
+        ]
+    )
+    
+    # --- CHOICE 1: SELECT AND DELETE ROWS MANUALLY ---
+    if action == "1. Select and delete specific rows manually":
+        rows_to_delete = st.multiselect(
+            "Select row indices to completely remove:",
+            options=missing_rows.index.tolist()
+        )
+        if st.button("Delete Selected Rows", type="primary"):
+            st.session_state.df_working = df.drop(index=rows_to_delete)
+            pop("Rows deleted successfully!")
+            st.rerun()
+
+    # --- CHOICE 2: FILL VALUES MANUALLY OR AUTOMATICALLY ---
+    elif action == "2. Fill values (Manually or Automatically)":
+        fill_method = st.selectbox("How to fill:", ["Enter a custom value", "Automatic (Mean / Median / Mode)"])
+        
+        if fill_method == "Enter a custom value":
+            custom_val = st.text_input("Type the value to fill into all missing spaces:")
+            if st.button("Apply Custom Fill", type="primary"):
+                st.session_state.df_working = df.fillna(custom_val)
+                pop("Missing data filled!")
+                st.rerun()
+                
+        elif fill_method == "Automatic (Mean / Median / Mode)":
+            strategy = st.selectbox("Select strategy:", ["Mean (Average)", "Median (Middle)", "Mode (Most Frequent)"])
+            if st.button("Apply Automatic Fill", type="primary"):
+                updated_df = df.copy()
+                for col in updated_df.columns:
+                    if updated_df[col].isnull().any():
+                        if strategy == "Mean (Average)" and pd.api.types.is_numeric_dtype(updated_df[col]):
+                            updated_df[col] = updated_df[col].fillna(updated_df[col].mean())
+                        elif strategy == "Median (Middle)" and pd.api.types.is_numeric_dtype(updated_df[col]):
+                            updated_df[col] = updated_df[col].fillna(updated_df[col].median())
+                        else:
+                            updated_df[col] = updated_df[col].fillna(updated_df[col].mode().iloc[0] if not updated_df[col].mode().empty else "Missing")
+                st.session_state.df_working = updated_df
+                pop("Missing data auto-filled!")
+                st.rerun()
+
+    # --- CHOICE 3: DELETE ALL THE COLUMNS ---
+    elif action == "3. Delete all columns containing missing values":
+        cols_with_missing = df.columns[df.isnull().any()].tolist()
+        st.warning(f"This will completely drop these columns: {cols_with_missing}")
+        if st.button("Confirm Column Deletion", type="primary"):
+            st.session_state.df_working = df.dropna(axis=1)
+            pop("Columns dropped successfully!")
+            st.rerun()
+
+
+# --- Main App Execution Logic ---
+if dataset is not None:
+    # Read the data once and save it to the session state
+    if "df_working" not in st.session_state:
+        st.session_state.df_working = pd.read_csv(dataset)
+        st.session_state.modal_triggered = False
+
+    df_current = st.session_state.df_working
+    has_missing = df_current.isnull().any().any()
+
+    # If missing values exist and we haven't resolved them yet
+    if has_missing:
+        # Show a warning button to open/reopen the modal
+        st.error("⚠️ This dataset contains missing values.")
+        if st.button("🔧 Open Data Cleaning Window") or not st.session_state.modal_triggered:
+            st.session_state.modal_triggered = True
+            clean_data_modal()
+    else:
+        st.success("🎉 Dataset is clean! No missing values remaining.")
+
+    # Always show the current state of the dataset on the main page
+    st.subheader("📊 Dataset Preview")
+    st.dataframe(df_current)
+else:
+    # Clear session data if the file is removed
+    if "df_working" in st.session_state:
+        del st.session_state.df_working
+        st.session_state.modal_triggered = False
