@@ -30,101 +30,104 @@ else:
     st.session_state.u = False
     st.info("Please upload a CSV file to begin.") 
 
+if col not in df.columns:
+    #Check Required Columns--------------------------------------------------------------------------------------
+    required_columns = [
+        "budget",
+        "revenue",
+        "genres",
+        "popularity",
+        "runtime",
+        "vote_average"
+    ]
+    missing_columns = [
+        col
+        for col in required_columns
+        if col not in df.columns
+    ]
+    if missing_columns:
 
-#Check Required Columns--------------------------------------------------------------------------------------
-required_columns = [
-    "budget",
-    "revenue",
-    "genres",
-    "popularity",
-    "runtime",
-    "vote_average"
-]
-missing_columns = [
-    col
-    for col in required_columns
-    if col not in df.columns
-]
-if missing_columns:
-
-    st.error(
-        f"Missing required columns: {', '.join(missing_columns)}"
-    )
-    st.stop()
-
-
-#Check Missing Values----------------------------------------------------------------------------------------
-missing = df.isnull().sum()
-
-missing = missing[missing > 0]
-
-st.subheader("Missing Values")
-if len(missing) > 0:
-
-    st.dataframe(missing)
+        st.error(
+            f"Missing required columns: {', '.join(missing_columns)}"
+        )
+        st.stop()
 
 
+    #Check Missing Values----------------------------------------------------------------------------------------
+    missing = df.isnull().sum()
 
-# Duplicate Value Detection-----------------------------------------------------------------------------------
-st.header("🔁 Duplicate Value Check")
+    missing = missing[missing > 0]
 
-duplicate_rows = df[df.duplicated(keep=False)]
+    st.subheader("Missing Values")
+    if len(missing) > 0:
 
-if duplicate_rows.empty:
-    st.success("✅ No duplicate rows found in the dataset.")
+        st.dataframe(missing)
 
+
+
+    # Duplicate Value Detection-----------------------------------------------------------------------------------
+    st.header("🔁 Duplicate Value Check")
+
+    duplicate_rows = df[df.duplicated(keep=False)]
+
+    if duplicate_rows.empty:
+        st.success("✅ No duplicate rows found in the dataset.")
+
+    else:
+        st.warning(f"⚠️ {duplicate_rows.shape[0]} duplicate rows detected.")
+
+        st.subheader("Duplicate Records")
+
+        st.dataframe(duplicate_rows, use_container_width=True)
+
+        option = st.radio(
+            "How would you like to handle duplicate values?",
+            (
+                "Keep All Duplicates",
+                "Remove All Duplicates",
+                "Manually Edit Dataset"
+            )
+        )
+
+        # ----------------------------------------
+        # Keep duplicates
+        # ----------------------------------------
+        if option == "Keep All Duplicates":
+
+            st.info("Duplicate rows have been kept in the dataset.")
+
+        # ----------------------------------------
+        # Remove duplicates
+        # ----------------------------------------
+        elif option == "Remove All Duplicates":
+
+            before = len(df)
+
+            df = df.drop_duplicates().reset_index(drop=True)
+
+            removed = before - len(df)
+
+            st.success(f"✅ {removed} duplicate rows removed successfully.")
+
+        # ----------------------------------------
+        # Manual editing
+        # ----------------------------------------
+        elif option == "Manually Edit Dataset":
+
+            st.info(
+                "You can edit or delete rows manually below. "
+                "Click any cell to edit it or remove unwanted rows."
+            )
+
+            edited_df = st.data_editor(
+                df,
+                use_container_width=True,
+                num_rows="dynamic"
+            )
+
+            df = edited_df
+
+            st.success("Changes applied successfully.")
 else:
-    st.warning(f"⚠️ {duplicate_rows.shape[0]} duplicate rows detected.")
-
-    st.subheader("Duplicate Records")
-
-    st.dataframe(duplicate_rows, use_container_width=True)
-
-    option = st.radio(
-        "How would you like to handle duplicate values?",
-        (
-            "Keep All Duplicates",
-            "Remove All Duplicates",
-            "Manually Edit Dataset"
-        )
-    )
-
-    # ----------------------------------------
-    # Keep duplicates
-    # ----------------------------------------
-    if option == "Keep All Duplicates":
-
-        st.info("Duplicate rows have been kept in the dataset.")
-
-    # ----------------------------------------
-    # Remove duplicates
-    # ----------------------------------------
-    elif option == "Remove All Duplicates":
-
-        before = len(df)
-
-        df = df.drop_duplicates().reset_index(drop=True)
-
-        removed = before - len(df)
-
-        st.success(f"✅ {removed} duplicate rows removed successfully.")
-
-    # ----------------------------------------
-    # Manual editing
-    # ----------------------------------------
-    elif option == "Manually Edit Dataset":
-
-        st.info(
-            "You can edit or delete rows manually below. "
-            "Click any cell to edit it or remove unwanted rows."
-        )
-
-        edited_df = st.data_editor(
-            df,
-            use_container_width=True,
-            num_rows="dynamic"
-        )
-
-        df = edited_df
-
-        st.success("Changes applied successfully.")
+    st.session_state.u = False
+    st.info("Please upload a CSV file to begin.")
