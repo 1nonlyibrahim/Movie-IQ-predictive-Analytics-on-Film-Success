@@ -20,7 +20,15 @@ uploaded_file = st.file_uploader(
 if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
-        st.toast("Dataset uploaded successfully!", icon="✅")
+        import streamlit as st
+
+def pop(msg):
+    st.components.v1.html(f'<div id="t" style="position:fixed;left:50%;top:-50px;transform:translateX(-50%);background:#d4edda;color:#155724;padding:12px 24px;border-radius:8px;font-family:sans-serif;font-weight:bold;box-shadow:0 4px 6px #0002;transition:all .5s">{msg}</div><script>t=document.getElementById("t");setTimeout(()=>t.style.top="20px",50);setTimeout(()=>t.style.top="-100px",3000)</script>', height=0)
+
+# Usage
+if st.button("Upload"):
+    pop("✅ Dataset uploaded successfully!")
+
 
 
 #Check Required Columns--------------------------------------------------------------------------------------
