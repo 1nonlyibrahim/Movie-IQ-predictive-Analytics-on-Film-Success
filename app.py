@@ -22,6 +22,8 @@ uploaded_file = st.file_uploader("Upload your movie dataset", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
+    # store dataframe in session state for editing operations
+    st.session_state.df = df.copy()
     if not st.session_state.u:
         pop("✅ Dataset uploaded successfully!")
         st.session_state.u = True
@@ -32,7 +34,7 @@ else:
     st.stop()
 
 if uploaded_file is not None:
-    #Check Required Columns--------------------------------------------------------------------------------------
+    # Check Required Columns and Missing Values in sidebar
     with st.sidebar:
         required_columns = [
             "budget",
@@ -40,27 +42,64 @@ if uploaded_file is not None:
             "genres",
             "popularity",
             "runtime",
-            "vote_average"
+            "vote_average",
         ]
         missing_columns = [
-            col
-            for col in required_columns
-            if col not in df.columns
+            col for col in required_columns if col not in st.session_state.df.columns
         ]
         if missing_columns:
-            st.error(
-                f"Missing required columns: {', '.join(missing_columns)}"
-            )
+            st.error(f"Missing required columns: {', '.join(missing_columns)}")
             st.stop()
 
-
-        #Check Missing Values----------------------------------------------------------------------------------------
-        missing = df.isnull().sum()
+        # Check Missing Values
+        missing = st.session_state.df.isnull().sum()
         missing = missing[missing > 0]
 
         if len(missing) > 0:
-            st.subheader("Missing Values")
+            st.subheader("Missing Values Found")
             st.dataframe(missing)
+
+            action = st.radio(
+                "Select how to handle missing data:",
+                ["Fill Manually", "Delete Selected Columns", "Delete All Missing (Rows)"],
+            )
+
+            if action == "Fill Manually":
+                selected_col = st.selectbox("Select column to fill:", missing.index.tolist())
+                fill_value = st.text_input(f"Enter value to replace NaN in '{selected_col}':")
+
+                if st.button("Apply Manual Fill"):
+                    if fill_value:
+                        try:
+                            fill_value = float(fill_value) if "." in fill_value else int(fill_value)
+                        except ValueError:
+                            pass
+                        st.session_state.df[selected_col] = st.session_state.df[selected_col].fillna(fill_value)
+                        st.success(f"Filled missing values in {selected_col}!")
+                        st.experimental_rerun()
+
+            elif action == "Delete Selected Columns":
+                cols_to_delete = st.multiselect("Select columns to completely remove:", missing.index.tolist())
+                if st.button("Delete Selected Columns"):
+                    if cols_to_delete:
+                        st.session_state.df = st.session_state.df.drop(columns=cols_to_delete)
+                        st.success(f"Deleted columns: {', '.join(cols_to_delete)}")
+                        st.experimental_rerun()
+
+            elif action == "Delete All Missing (Rows)":
+                st.warning("This deletes any row containing a missing value.")
+                if st.button("Confirm Row Deletion"):
+                    st.session_state.df = st.session_state.df.dropna()
+                    st.success("Successfully dropped rows with missing values!")
+                    st.experimental_rerun()
+
+        else:
+            st.success("✨ No missing values detected in the dataset!")
+
+        # --- Main App Body ---
+        st.title("Dataset Dashboard")
+        st.write("### Current Data Frame")
+        st.dataframe(st.session_state.df)
 
 
 
