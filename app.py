@@ -42,28 +42,25 @@ if uploaded_file is not None:
             "runtime",
             "vote_average"
         ]
-    missing_columns = [
-        col
-        for col in required_columns
-        if col not in df.columns
-    ]
-    if missing_columns:
+        missing_columns = [
+            col
+            for col in required_columns
+            if col not in df.columns
+        ]
+        if missing_columns:
+            st.error(
+                f"Missing required columns: {', '.join(missing_columns)}"
+            )
+            st.stop()
 
-        st.error(
-            f"Missing required columns: {', '.join(missing_columns)}"
-        )
-        st.stop()
 
+        #Check Missing Values----------------------------------------------------------------------------------------
+        missing = df.isnull().sum()
+        missing = missing[missing > 0]
 
-    #Check Missing Values----------------------------------------------------------------------------------------
-    missing = df.isnull().sum()
-
-    missing = missing[missing > 0]
-
-    st.subheader("Missing Values")
-    if len(missing) > 0:
-
-        st.dataframe(missing)
+        if len(missing) > 0:
+            st.subheader("Missing Values")
+            st.dataframe(missing)
 
 
 
