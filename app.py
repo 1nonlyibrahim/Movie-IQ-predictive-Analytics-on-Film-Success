@@ -11,24 +11,22 @@ st.set_page_config(
 
 st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h1>", unsafe_allow_html=True)
 
-st.markdown("Analyze and explore your movie dataset instantly.")
+st.markdown("<p style='text-align: center;'>Analyze and explore your movie dataset instantly.</p>", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader(
-    "Upload your movie dataset",
-    type=["csv"]
-)
+def pop(m):
+    st.components.v1.html(f'<div style="position:fixed;left:50%;transform:translateX(-50%);background:#d4edda;color:#155724;padding:12px 24px;border-radius:8px;font-family:sans-serif;font-weight:bold;box-shadow:0 4px 6px #0002;z-index:99999;animation:s 3s forwards">{m}</div><style>@keyframes s{{0%,100%{{top:-99px}}15%,85%{{top:20px}}}}</style>',height=0)
+
+if "u" not in st.session_state: st.session_state.u = False
+
+uploaded_file = st.file_uploader("Upload your movie dataset", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-
-    def pop(msg):
-        st.components.v1.html(
-            f'<div id="t" style="position:fixed;left:50%;top:-50px;transform:translateX(-50%);background:#d4edda;color:#155724;padding:12px 24px;border-radius:8px;font-family:sans-serif;font-weight:bold;box-shadow:0 4px 6px #0002;transition:all .5s">{msg}</div><script>t=document.getElementById("t");setTimeout(()=>t.style.top="20px",50);setTimeout(()=>t.style.top="-100px",3000)</script>',
-            height=0
-        )
-
-    pop("✅ Dataset uploaded successfully!")
-
+    if not st.session_state.u:
+        pop("✅ Dataset uploaded successfully!")
+        st.session_state.u = True
+else:
+    st.session_state.u = False
 
 
 #Check Required Columns--------------------------------------------------------------------------------------
