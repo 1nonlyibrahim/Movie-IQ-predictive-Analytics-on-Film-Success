@@ -35,7 +35,7 @@ else:
 #===========================================================================================================================================================================================
 #checking and correcting for any missing values or duplicates values in the dataset
 #===========================================================================================================================================================================================
-@st.dialog("🛠️ Clean Missing Values", width="large")
+@st.dialog("Fill Missing Values", width="large")
 def clean_data_modal():
     # Fetch the dataset from session state
     df = st.session_state.df_working
@@ -53,7 +53,7 @@ def clean_data_modal():
         [
             "1. Select and delete specific rows manually",
             "2. Fill values (Manually or Automatically)",
-            "3. Delete all columns containing missing values"
+            "3. Delete all rows containing missing values"
         ]
     )
     
@@ -95,12 +95,11 @@ def clean_data_modal():
                 pop("Missing data auto-filled!")
                 st.rerun()
 
-    # --- CHOICE 3: DELETE ALL THE COLUMNS ---
-    elif action == "3. Delete all columns containing missing values":
-        cols_with_missing = df.columns[df.isnull().any()].tolist()
-        st.warning(f"This will completely drop these columns: {cols_with_missing}")
-        if st.button("Confirm Column Deletion", type="primary"):
-            st.session_state.df_working = df.dropna(axis=1)
+    # --- CHOICE 3: DELETE ALL THE ROWS ---
+    elif action == "3. Delete all rows containing missing values":
+        st.warning("This will completely drop all rows with any missing values.")
+        if st.button("Confirm Row Deletion", type="primary"):
+            st.session_state.df_working = df.dropna()
             pop("Columns dropped successfully!")
             st.rerun()
 
