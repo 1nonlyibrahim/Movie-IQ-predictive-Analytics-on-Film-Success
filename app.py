@@ -119,10 +119,10 @@ if dataset is not None:
         # Show a warning button to open/reopen the modal
         st.error("⚠️ This dataset contains missing values.")
         if st.button("🔧 Open Data Filling Window") or not st.session_state.modal_triggered:
-            st.session_state.modal_triggered = False
+            st.session_state.modal_triggered = True
             clean_data_modal()
     else:
-        st.success("🎉 Dataset is clean! No missing values remaining.")
+        pop("🎉 Dataset is clean! No missing values remaining.")
 
     # Always show the current state of the dataset on the main page
     st.subheader("📊 Dataset Preview")
