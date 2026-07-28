@@ -100,7 +100,7 @@ def clean_data_modal():
         st.warning("This will completely drop all rows with any missing values.")
         if st.button("Confirm Row Deletion", type="primary"):
             st.session_state.df_working = df.dropna()
-            pop("Columns dropped successfully!")
+            pop("Rows dropped successfully!")
             st.rerun()
 
 
@@ -118,8 +118,8 @@ if dataset is not None:
     if has_missing:
         # Show a warning button to open/reopen the modal
         st.error("⚠️ This dataset contains missing values.")
-        if st.button("🔧 Open Data Cleaning Window") or not st.session_state.modal_triggered:
-            st.session_state.modal_triggered = True
+        if st.button("🔧 Open Data Filling Window") or not st.session_state.modal_triggered:
+            st.session_state.modal_triggered = False
             clean_data_modal()
     else:
         st.success("🎉 Dataset is clean! No missing values remaining.")
