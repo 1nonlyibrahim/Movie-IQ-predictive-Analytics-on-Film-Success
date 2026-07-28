@@ -8,9 +8,9 @@ st.set_page_config(
     page_icon="🎬",
     layout="wide"
 )
+st.title("Movie IQ: Film Success Predictor")
 
 with st.sidebar:
-    st.title("Movie IQ: Film Success Predictor")
     st.markdown("Analyze and explore your movie dataset instantly.")
 
     uploaded_file = st.file_uploader(
@@ -21,7 +21,7 @@ with st.sidebar:
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
-    st.success("Dataset uploaded successfully!")
+        st.success("Dataset uploaded successfully!")
 
     st.subheader("Dataset Preview")
 
