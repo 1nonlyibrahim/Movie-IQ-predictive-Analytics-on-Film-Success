@@ -2,6 +2,29 @@ import streamlit as st
 import pandas as pd
 import time
 
+st.markdown(
+    """
+    <style>
+    /* Gradient Background */
+    .stAppViewContainer {
+        background: linear-gradient(180deg, #0d0d0d 0%, #1a080a 50%, #2e080c 100%);
+    }
+    .stHeader {
+        background: transparent !important;
+    }
+    /* Text Color Fixes for Dark Mode vibe */
+    h1, h2, h3, p, span, label {
+        color: #f5f5f5 !important;
+    }
+    /* Accent Color for Headers */
+    h1 {
+        color: #d4af37 !important; /* Hollywood Gold */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 #===========================================================================================================================================================================================
 #Add File Upload box & main heads
 #===========================================================================================================================================================================================
