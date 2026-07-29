@@ -182,13 +182,13 @@ st.markdown(f"""
 if not st.session_state.uploaded:
 
 
-    uploaded_file=st.file_uploader(
-        "Drag & Drop your CSV here or Click to Upload",
-        type=["csv"],
-        help="Only CSV files are supported."
-    )
+uploaded_file = st.file_uploader(
+    "Drag & Drop your CSV here or Click to Upload",
+    type=["csv"],
+    help="Only CSV files are supported."
+)
 
-    if uploaded_file:
+if uploaded_file and not st.session_state.uploaded:
 
         loader=st.empty()
         progress=st.progress(0)
@@ -209,7 +209,7 @@ if not st.session_state.uploaded:
         try:
             df=pd.read_csv(uploaded_file)
 
-            st.session_state.df=df
+            st.session_state.df = df
             st.session_state.uploaded=True
 
             loader.empty()
@@ -218,10 +218,19 @@ if not st.session_state.uploaded:
             st.toast("🎉 Dataset Uploaded Successfully!",icon="✅")
             st.success("Dataset uploaded successfully. Preparing analysis dashboard...")
 
-            st.rerun()
 
         except Exception as e:
             loader.error(f"Unable to read CSV.\n{e}")
+else:
+    msg = st.empty()
+
+    msg.success("✅ Dataset Uploaded Successfully!")
+
+    time.sleep(3)
+
+    msg.empty()
+
+    st.rerun()
 
 #==========================================================================================================================================================================================
 #upload the dataset
