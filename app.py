@@ -1,29 +1,47 @@
 import streamlit as st
 import pandas as pd
 import time
+import base64
 
-st.markdown(
-    """
-    <style>
-    /* Gradient Background */
-    .stAppViewContainer {
-        background: linear-gradient(180deg, #0d0d0d 0%, #1a080a 50%, #2e080c 100%);
-    }
-    .stHeader {
-        background: transparent !important;
-    }
-    /* Text Color Fixes for Dark Mode vibe */
-    h1, h2, h3, p, span, label {
-        color: #f5f5f5 !important;
-    }
-    /* Accent Color for Headers */
-    h1 {
-        color: #d4af37 !important; /* Hollywood Gold */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+def get_base64_image(image_path):
+    """Encodes a local image to base64 string."""
+    with open(image_path, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+
+# Your exact absolute Windows file path
+image_path = r"C:\Users\admin\Desktop\MovieIQ\image.jpg"
+
+try:
+    img_base64 = get_base64_image(image_path)
+
+    # Inject CSS to set your background image
+    st.markdown(
+        f"""
+        <style>
+        .stAppViewContainer {{
+            background-image: url("data:image/jpg;base64,{img_base64}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        .stHeader {{
+            background: transparent !important;
+        }}
+        /* Makes all text elements white to contrast with your dark blue image */
+        h1, h2, h3, p, span, label, li {{
+            color: #ffffff !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+except FileNotFoundError:
+    st.error(
+        f"Could not find the image at: {image_path}. Please check the folder path and extension."
+    )
 
 #===========================================================================================================================================================================================
 #Add File Upload box & main heads
