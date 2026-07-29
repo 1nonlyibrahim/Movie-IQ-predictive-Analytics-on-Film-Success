@@ -179,31 +179,28 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-if not st.session_state.uploaded:
-
-    uploaded_file = st.file_uploader(
+uploaded_file = st.file_uploader(
     "Drag & Drop your CSV here or Click to Upload",
     type=["csv"],
     help="Only CSV files are supported."
 )
 
-    if uploaded_file and not st.session_state.uploaded:
+if uploaded_file and not st.session_state.uploaded:
 
-        loader=st.empty()
-        progress=st.progress(0)
+    loader=st.empty()
+    progress=st.progress(0)
 
-        steps=[
-            "📂 Reading Dataset...",
-            "📄 Parsing CSV...",
-            "🔍 Validating File...",
-            "⚙ Preparing Workspace...",
-            "🚀 Almost Ready..."
-        ]
+    steps=[
+        "📂 Reading Dataset...",
+        "📄 Parsing CSV...",
+        "⚙ Preparing Workspace...",
+        "🚀 Almost Ready..."
+    ]
 
-        for i,s in enumerate(steps):
-            loader.info(s)
-            progress.progress(int((i+1)/len(steps)*100))
-            time.sleep(0.6)
+    for i,s in enumerate(steps):
+        loader.info(s)
+        progress.progress(int((i+1)/len(steps)*100))
+        time.sleep(0.6)
 
         try:
             df=pd.read_csv(uploaded_file)
