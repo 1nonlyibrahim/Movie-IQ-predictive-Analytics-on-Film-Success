@@ -4,46 +4,28 @@ import pandas as pd
 import os
 import base64
 
-def get_base64_image():
-    """Locates 'bg' image in the cloud workspace directory."""
-    extensions = [".jpg", ".png", ".jpeg", ".JPG", ".PNG"]
+IMAGE_URL = "https://share.google/ON4aLVmlPCQkMqXT7"
 
-    for ext in extensions:
-        filename = f"bg{ext}"
-        if os.path.exists(filename):
-            with open(filename, "rb") as f:
-                data = f.read()
-            return base64.b64encode(data).decode(), ext.replace(".", "")
-    return None, None
-
-
-img_base64, img_type = get_base64_image()
-
-if img_base64:
-    st.markdown(
-        f"""
-        <style>
-        .stAppViewContainer {{
-            background-image: url("data:image/{img_type};base64,{img_base64}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        .stHeader {{
-            background: transparent !important;
-        }}
-        h1, h2, h3, p, span, label, li {{
-            color: #ffffff !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-else:
-    st.error(
-        "🎬 Almost there! Please push your image named 'bg.jpg' or 'bg.png' directly to your GitHub repository root folder."
-    )
+st.markdown(
+    f"""
+    <style>
+    .stAppViewContainer {{
+        background-image: url("{IMAGE_URL}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    .stHeader {{
+        background: transparent !important;
+    }}
+    h1, h2, h3, p, span, label, li {{
+        color: #ffffff !important;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 #===========================================================================================================================================================================================
 #Add File Upload box & main heads
