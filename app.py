@@ -142,11 +142,6 @@ def main():
     unsafe_allow_html=True
 )
 
-    st.markdown(
-    "<p style='text-align: center; color: gray; font-size: 0.85em;'>Intelligent Movie Dataset Analysis & Prediction Platform</p>", 
-    unsafe_allow_html=True
-)
-
 
 if __name__ == "__main__":
     main()
@@ -160,24 +155,29 @@ if "df" not in st.session_state:
 if "uploaded" not in st.session_state:
     st.session_state.uploaded = False
 
-st.markdown("""
+st.markdown(f"""
 <style>
-.block-container{padding-top:2rem;}
-[data-testid="stFileUploader"]{width:70%;margin:auto;}
-[data-testid="stFileUploader"] section{
-border:2px dashed #4F8BF9;
-border-radius:18px;
-padding:60px;
-background:#181818;
-transition:.3s;
-}
-[data-testid="stFileUploader"] section:hover{
-border-color:#78A9FF;
-background:#222;
-transform:scale(1.01);
-}
+.block-container{{padding-top:2rem;}}
+[data-testid="stFileUploader"]{{
+    width:{"70%" if not st.session_state.uploaded else "35%"};
+    margin:auto;
+    transition:all .4s ease;
+}}
+
+[data-testid="stFileUploader"] section{{
+    border:2px dashed #4F8BF9;
+    border-radius:18px;
+    padding:{"60px" if not st.session_state.uploaded else "15px"};
+    background:#181818;
+    transition:.3s;
+}}
+
+[data-testid="stFileUploader"] section:hover{{
+    border-color:#78A9FF;
+    background:#222;
+}}
 </style>
-""",unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 if not st.session_state.uploaded:
 
@@ -222,39 +222,6 @@ if not st.session_state.uploaded:
 
         except Exception as e:
             loader.error(f"Unable to read CSV.\n{e}")
-
-else:
-
-    df = st.session_state.df
-
-    st.markdown("""
-    <style>
-    [data-testid="stFileUploader"]{
-        width:30%;
-        margin-left:auto;
-        margin-right:0;
-        margin-bottom:15px;
-    }
-
-    [data-testid="stFileUploader"] section{
-        padding:12px;
-        border-radius:12px;
-        font-size:13px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    uploaded_file = st.file_uploader(
-        "Replace Dataset",
-        type=["csv"],
-        label_visibility="collapsed"
-    )
-
-    if uploaded_file:
-        st.session_state.df = pd.read_csv(uploaded_file)
-        st.rerun()
-
-    # Continue with validation, cleaning and dashboard below...
 
 #==========================================================================================================================================================================================
 #upload the dataset
