@@ -175,9 +175,6 @@ transform:scale(1.01);
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 MovieIQ")
-st.caption("Intelligent Movie Dataset Analysis & Prediction Platform")
-
 uploaded_file = st.file_uploader(
     "Drag & Drop your CSV here or Click to Upload",
     type="csv",
