@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+import time
 #===========================================================================================================================================================================================
 #Add File Upload box & main heads
 #===========================================================================================================================================================================================
@@ -25,12 +25,13 @@ dataset = st.file_uploader("Upload a CSV file to begin", type=["csv"])
 
 if dataset is not None:
     if not st.session_state.uploaded:
-        pop("dataset Uploaded successfully!")
-        
+        with st.spinner("Processing dataset..."):
+            time.sleep(1)  # Holds spinner visible for 1 second
+            pop("dataset Uploaded successfully!")
+            st.session_state.uploaded = True  # Fixes the loop bug
 else:
-    # 3. Reset the tracker if the user clears the file
     st.session_state.uploaded = False
-
+    
 #===========================================================================================================================================================================================
 #verifying wether dataset has all required columns or not
 #===========================================================================================================================================================================================
