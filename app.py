@@ -354,7 +354,7 @@ if st.session_state.uploaded:
             st.session_state.validation_complete = True
 
             st.info(
-                "Next Step → Missing Value Detection"
+                "Next Step → Duplicate Value Detection"
             )
         
         # Centered button to open the validation dialog
