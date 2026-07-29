@@ -251,67 +251,65 @@ if st.session_state.uploaded:
 
     if not st.session_state.validation_started:
 
-        col1, col2, col3 = st.columns([1,2,1])
+        @st.dialog("🔍 Dataset Validation", width="large")
+        def validation_window():
+            progress = st.progress(0)
+            status = st.empty()
 
-        with col2:
-            @st.dialog("🔍 Dataset Validation", width="large")
-            def validation_window():
-                progress = st.progress(0)
-                status = st.empty()
+            status.info("🔍 Step 1 / 3 : Checking Required Columns...")
 
-                status.info("🔍 Step 1 / 3 : Checking Required Columns...")
+            progress.progress(15)
 
-                progress.progress(15)
+            time.sleep(0.8)
 
-                time.sleep(0.8)
+            missing_columns = [
+                col
+                for col in REQUIRED_COLUMNS
+                if col not in df.columns
+            ]
 
-                missing_columns = [
-                    col
-                    for col in REQUIRED_COLUMNS
-                    if col not in df.columns
-                ]
+            progress.progress(33)
 
-                progress.progress(33)
+            if missing_columns:
 
-                if missing_columns:
+                status.error("❌ Required Columns Missing")
 
-                    status.error("❌ Required Columns Missing")
-
-                    st.error(
-                        "The uploaded dataset cannot be analyzed because required columns are missing."
-                    )
-
-                    st.dataframe(
-                        pd.DataFrame(
-                            {"Missing Columns": missing_columns}
-                        ),
-                        use_container_width=True
-                    )
-
-                    st.stop()
-
-                progress.progress(100)
-
-                status.success("✅ Required Columns Verified")
-
-                time.sleep(1)
-
-                progress.empty()
-                status.empty()
-
-                st.success("Step 1 Completed")
-
-                st.session_state.validation_complete = True
-
-                st.info(
-                    "Next Step → Missing Value Detection"
+                st.error(
+                    "The uploaded dataset cannot be analyzed because required columns are missing."
                 )
-            # Centered button to open the validation dialog
-            btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
-            with btn_col2:
-                if st.button("Perform Data Validation", type="primary", use_container_width=True):
-                    st.session_state.validation_started = True
-                    validation_window()
+
+                st.dataframe(
+                    pd.DataFrame(
+                        {"Missing Columns": missing_columns}
+                    ),
+                    use_container_width=True
+                )
+
+                st.stop()
+
+            progress.progress(100)
+
+            status.success("✅ Required Columns Verified")
+
+            time.sleep(1)
+
+            progress.empty()
+            status.empty()
+
+            st.success("Step 1 Completed")
+
+            st.session_state.validation_complete = True
+
+            st.info(
+                "Next Step → Missing Value Detection"
+            )
+        
+        # Centered button to open the validation dialog
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("Perform Data Validation", type="primary", use_container_width=True):
+                st.session_state.validation_started = True
+                validation_window()
 #==========================================================================================================================================================================================
 #check for any missing values in the dataset
 #==========================================================================================================================================================================================
