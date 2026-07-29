@@ -382,6 +382,64 @@ if st.session_state.uploaded:
                 )
 
                 time.sleep(1)
+            status.info("🔄 Step 4 / 4 : Correcting Column Data Types...")
+
+            progress.progress(90)
+
+            time.sleep(0.8)
+
+            # Numeric Columns
+            numeric_columns = [
+                "budget",
+                "revenue",
+                "runtime",
+                "popularity",
+                "vote_average"
+            ]
+
+            for col in numeric_columns:
+
+                if col in df_local.columns:
+
+                    df_local[col] = pd.to_numeric(
+                        df_local[col],
+                        errors="coerce"
+                    )
+
+            # String Columns
+            string_columns = [
+                "title",
+                "genres"
+            ]
+
+            for col in string_columns:
+
+                if col in df_local.columns:
+
+                    df_local[col] = (
+                        df_local[col]
+                        .astype(str)
+                        .str.strip()
+                    )
+
+            # Remove rows that became NaN after conversion
+            df_local = df_local.dropna().reset_index(drop=True)
+
+            # Create Success Column
+            if "success" not in df_local.columns:
+
+                df_local["success"] = (
+                    df_local["revenue"] >
+                    df_local["budget"]
+                ).astype(int)
+
+            st.session_state.df = df_local
+
+            progress.progress(100)
+
+            status.success("✅ Data Types Corrected Successfully")
+
+            time.sleep(1)
 
             # -------------------- VALIDATION COMPLETE --------------------
 
