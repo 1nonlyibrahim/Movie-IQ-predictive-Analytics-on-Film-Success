@@ -17,8 +17,72 @@ st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h
 st.markdown("<p style='text-align: center;'>Analyze and explore your movie dataset instantly.</p>", unsafe_allow_html=True)
 
 def pop(m):
-    st.markdown(f'<div style="position:fixed;left:50%;transform:translateX(-50%);background:#d4edda;color:#155724;padding:14px 28px;border-radius:8px;font-family:sans-serif;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999999;width:max-content;animation:s 3s cubic-bezier(0.25,1,0.5,1) forwards">{m}</div><style>@keyframes s{{0%{{top:-100px;opacity:0}}15%{{top:30px;opacity:1}}85%{{top:30px;opacity:1}}100%{{top:-100px;opacity:0}}}}</style>', unsafe_allow_html=True)
+    uid = int(time.time() * 1000000) + hash(m) % 1000
+    st.markdown(
+        f"""
+        <div id="notif-trigger-{uid}" style="display:none;"></div>
+        <script>
+        (function() {{
+            let container = document.getElementById('notif-stack-container');
+            if (!container) {{
+                container = document.createElement('div');
+                container.id = 'notif-stack-container';
+                container.style.position = 'fixed';
+                container.style.top = '30px';
+                container.style.left = '50%';
+                container.style.transform = 'translateX(-50%)';
+                container.style.zIndex = '999999';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '10px';
+                container.style.alignItems = 'center';
+                container.style.width = 'max-content';
+                container.style.pointerEvents = 'none';
+                document.body.appendChild(container);
+            }}
 
+            const el = document.createElement('div');
+            el.style.background = '#d4edda';
+            el.style.color = '#155724';
+            el.style.padding = '14px 28px';
+            el.style.borderRadius = '8px';
+            el.style.fontFamily = 'sans-serif';
+            el.style.fontWeight = 'bold';
+            el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            el.style.width = 'max-content';
+            el.style.pointerEvents = 'auto';
+            el.style.animation = 'slideInDown 3s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+
+            el.innerHTML = `<span>{m}</span>`;
+
+            if (!document.getElementById('notif-stack-styles')) {{
+                const style = document.createElement('style');
+                style.id = 'notif-stack-styles';
+                style.innerHTML = `
+                    @keyframes slideInDown {{
+                        0% {{ transform: translateY(-50px); opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; overflow: hidden; }}
+                        15% {{ transform: translateY(0); opacity: 1; max-height: 100px; }}
+                        85% {{ transform: translateY(0); opacity: 1; max-height: 100px; opacity: 1; }}
+                        100% {{ transform: translateY(-50px); opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; overflow: hidden; }}
+                    }}
+                `;
+                document.head.appendChild(style);
+            }}
+
+            container.appendChild(el);
+
+            setTimeout(() => {{
+                el.remove();
+                if (container.childElementCount === 0) {{
+                    container.remove();
+                }}
+            }}, 3000);
+        }})();
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+    
 if "uploaded" not in st.session_state:
     st.session_state.uploaded = False
 
