@@ -227,7 +227,97 @@ if not st.session_state.uploaded:
         success.empty()
         st.session_state.uploaded=True
         st.session_state.df=df
+
 #==========================================================================================================================================================================================
-#upload the dataset
+#check for any missing columns in the dataset
+#==========================================================================================================================================================================================
+
+REQUIRED_COLUMNS = [
+    "title",
+    "budget",
+    "revenue",
+    "genres",
+    "runtime",
+    "popularity",
+    "vote_average"
+]
+
+if "validation_started" not in st.session_state:
+    st.session_state.validation_started = False
+
+if "validation_complete" not in st.session_state:
+    st.session_state.validation_complete = False
+
+if st.session_state.uploaded:
+
+    df = st.session_state.df
+
+    st.divider()
+
+    if not st.session_state.validation_started:
+
+        if st.button(
+            "🚀 Start Data Validation",
+            use_container_width=True,
+            type="primary"
+        ):
+            st.session_state.validation_started = True
+            st.rerun()
+
+    if st.session_state.validation_started:
+
+        progress = st.progress(0)
+        status = st.empty()
+
+        status.info("🔍 Step 1 / 3 : Checking Required Columns...")
+
+        progress.progress(15)
+
+        time.sleep(0.8)
+
+        missing_columns = [
+            col
+            for col in REQUIRED_COLUMNS
+            if col not in df.columns
+        ]
+
+        progress.progress(33)
+
+        if missing_columns:
+
+            status.error("❌ Required Columns Missing")
+
+            st.error(
+                "The uploaded dataset cannot be analyzed because required columns are missing."
+            )
+
+            st.dataframe(
+                pd.DataFrame(
+                    {"Missing Columns": missing_columns}
+                ),
+                use_container_width=True
+            )
+
+            st.stop()
+
+        progress.progress(100)
+
+        status.success("✅ Required Columns Verified")
+
+        time.sleep(1)
+
+        progress.empty()
+        status.empty()
+
+        st.success("Step 1 Completed")
+
+        st.session_state.validation_complete = True
+
+        st.info(
+            "Next Step → Missing Value Detection (Part B)"
+        )
+
+#==========================================================================================================================================================================================
+#check for any missing values in the dataset
 #==========================================================================================================================================================================================
 
