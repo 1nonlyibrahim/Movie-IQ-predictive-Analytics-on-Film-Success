@@ -648,13 +648,13 @@ if st.session_state.validation_complete:
     with c2:
         st.metric(
             "💰 Total Revenue",
-            format_indian(total_revenue)
+            format_currency_indian(total_revenue)
         )
 
     with c3:
         st.metric(
             "💸 Total Budget",
-            format_indian(total_budget)
+            format_currency_indian(total_budget)
         )
 
     with c4:
