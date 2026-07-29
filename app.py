@@ -450,7 +450,7 @@ if st.session_state.uploaded:
         # Centered button to open the validation dialog
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if not st.session_state.validation_complete:
+              if not st.session_state.validation_complete:
                 if st.button("Perform Data Validation", type="primary", use_container_width=True):
                     st.session_state.validation_started = True
                     validation_window()
@@ -584,8 +584,26 @@ if st.session_state.validation_complete:
     #==========================================================================================================================================================================================
     #KPI cards
     #==========================================================================================================================================================================================
+    def format_indian(num):
+        num = float(num)
+        sign = "-" if num < 0 else ""
+        num = abs(num)
+
+        integer, decimal = f"{num:.2f}".split(".")
+        if len(integer) > 3:
+            last3 = integer[-3:]
+            rest = integer[:-3]
+            parts = []
+            while len(rest) > 2:
+                parts.insert(0, rest[-2:])
+                rest = rest[:-2]
+            if rest:
+                parts.insert(0, rest)
+            integer = ",".join(parts + [last3])
+
+        return f"{sign}₹{integer}.{decimal}"
+
     st.markdown("## 📊 Executive Overview")
-    st.caption("A high-level summary of the uploaded movie dataset.")
 
     # ---------- Calculate KPIs ----------
 
@@ -635,13 +653,13 @@ if st.session_state.validation_complete:
     with c2:
         st.metric(
             "💰 Total Revenue",
-            f"${total_revenue:,.0f}"
+            format_indian(total_revenue)
         )
 
     with c3:
         st.metric(
             "💸 Total Budget",
-            f"${total_budget:,.0f}"
+            format_indian(total_budget)
         )
 
     with c4:
@@ -673,6 +691,7 @@ if st.session_state.validation_complete:
         )
 
     with c8:
+        st.markdown("""<style>[data-testid="stMetricValue"]{ font-size:22px !important;}</style>""", unsafe_allow_html=True)
         st.metric(
             "🎭 Most Common Genre",
             most_common_genre
