@@ -259,8 +259,6 @@ if st.session_state.uploaded:
         col1, col2, col3 = st.columns([1,2,1])
 
         with col2:
-            if st.button("🚀 Start Data Validation", type="primary"):
-                st.session_state.validation_started = True
             @st.dialog("🔍 Dataset Validation", width="large")
             def validation_window():
                 progress = st.progress(0)
@@ -313,8 +311,10 @@ if st.session_state.uploaded:
                 st.info(
                     "Next Step → Missing Value Detection"
                 )
-                if st.session_state.validation_started:
-                    validation_window()
+            # Centered button to open the validation dialog
+            if st.button("Perform Data Validation", type="primary"):
+                st.session_state.validation_started = True
+                validation_window()
 #==========================================================================================================================================================================================
 #check for any missing values in the dataset
 #==========================================================================================================================================================================================
