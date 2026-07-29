@@ -353,7 +353,7 @@ if st.session_state.uploaded:
 
             if duplicate_count == 0:
 
-                progress.progress(50
+                progress.progress(50)
 
                 status.success("✅ No Duplicate Rows Found")
 
