@@ -450,13 +450,10 @@ if st.session_state.uploaded:
         # Centered button to open the validation dialog
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if st.button("Perform Data Validation", type="primary", use_container_width=True):
-                st.session_state.validation_started = True
-                validation_window()
-
-if not st.session_state.validation_complete:
-    if st.button("🚀 Perform Data Validation"):
-        validation_window()
+            if not st.session_state.validation_complete:
+                if st.button("Perform Data Validation", type="primary", use_container_width=True):
+                    st.session_state.validation_started = True
+                    validation_window()
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
