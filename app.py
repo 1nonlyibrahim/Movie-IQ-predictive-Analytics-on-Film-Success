@@ -138,7 +138,7 @@ def create_target(df):
 def main():
 
     st.markdown(
-    "<h1 style='text-align: center;'>🎬 MOVIEIQ - INTELLIGENT MOVIE DATASET ANALYSIS & PREDICTION</h1>", 
+    "<h1 style='text-align: center;'>MOVIEIQ - INTELLIGENT MOVIE DATASET ANALYSIS & PREDICTION</h1>", 
     unsafe_allow_html=True
 )
 
