@@ -276,8 +276,6 @@ if st.session_state.uploaded:
                 if col not in df_local.columns
             ]
 
-            progress.progress(0)
-
             if missing_columns:
 
                 status.error("❌ Required Columns Missing")
@@ -295,7 +293,7 @@ if st.session_state.uploaded:
 
                 st.stop()
 
-            progress.progress(25)
+            progress.progress(20)
 
             status.success("✅ Required Columns Verified")
 
@@ -303,15 +301,13 @@ if st.session_state.uploaded:
 
             status.info("🧹 Step 2 / 4 : Checking Missing Values...")
 
-            progress.progress(25)
+            progress.progress(20)
 
             time.sleep(1.5)
 
             missing_count = int(df_local.isnull().sum().sum())
 
             if missing_count == 0:
-
-                progress.progress(25)
 
                 status.success("✅ No Missing Values Found")
 
@@ -333,27 +329,23 @@ if st.session_state.uploaded:
 
                 st.session_state.df = df_local
 
-                progress.progress(50)
-
                 status.success(
                     f"✅ Removed {removed_rows} row(s) containing missing values."
                 )
 
                 time.sleep(1)
 
+            progress.progress(40)
+
             # -------------------- STEP 3 : DUPLICATE VALUE CHECK --------------------
 
             status.info("📑 Step 3 / 4 : Checking Duplicate Values...")
-
-            progress.progress(50)
 
             time.sleep(1.5)
 
             duplicate_count = int(df_local.duplicated().sum())
 
             if duplicate_count == 0:
-
-                progress.progress(50)
 
                 status.success("✅ No Duplicate Rows Found")
 
@@ -375,16 +367,15 @@ if st.session_state.uploaded:
 
                 st.session_state.df = df_local
 
-                progress.progress(75)
-
                 status.success(
                     f"✅ Removed {removed_rows} duplicate row(s)."
                 )
 
                 time.sleep(1.5)
-            status.info("🔄 Step 4 / 4 : Correcting Column Data Types...")
 
-            progress.progress(75)
+            progress.progress(60)
+
+            status.info("🔄 Step 4 / 4 : Correcting Column Data Types...")
 
             time.sleep(1.5)
 
@@ -452,7 +443,7 @@ if st.session_state.uploaded:
 
             st.session_state.validation_complete = True
 
-            time.sleep(3)
+            time.sleep(2)
 
             st.rerun()
         
