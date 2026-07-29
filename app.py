@@ -10,8 +10,8 @@ def get_base64_image(image_path):
     return base64.b64encode(data).decode()
 
 
-# Your exact absolute Windows file path
-image_path = r"C:\Users\admin\Desktop\MovieIQ\image.jpg"
+# Your updated absolute path to the desktop
+image_path = r"C:\Users\admin\Desktop\image.jpg"
 
 try:
     img_base64 = get_base64_image(image_path)
@@ -30,7 +30,7 @@ try:
         .stHeader {{
             background: transparent !important;
         }}
-        /* Makes all text elements white to contrast with your dark blue image */
+        /* Ensures global readability over the deep blue background */
         h1, h2, h3, p, span, label, li {{
             color: #ffffff !important;
         }}
@@ -40,7 +40,7 @@ try:
     )
 except FileNotFoundError:
     st.error(
-        f"Could not find the image at: {image_path}. Please check the folder path and extension."
+        f"Could not find the image at: {image_path}. Please double-check if Windows is hiding the real extension (like image.jpg.png)."
     )
 
 #===========================================================================================================================================================================================
