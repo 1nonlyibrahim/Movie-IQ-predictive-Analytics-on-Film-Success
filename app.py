@@ -187,10 +187,10 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file and not st.session_state.uploaded:
 
-    loader=st.empty()
-    progress=st.progress(0)
+    loader = st.empty()
+    progress = st.progress(0)
 
-    steps=[
+    steps = [
         "📂 Reading Dataset...",
         "📄 Parsing CSV...",
         "🔍 Validating File...",
@@ -198,33 +198,30 @@ if uploaded_file and not st.session_state.uploaded:
         "🚀 Almost Ready..."
     ]
 
-    for i,s in enumerate(steps):
-        loader.info(s)
-        progress.progress(int((i+1)/len(steps)*100))
-        time.sleep(0.6)
+    # Show a staged progress animation while attempting to read once
+    try:
+        # initial stage
+        for i, s in enumerate(steps):
+            loader.info(s)
+            progress.progress(int((i + 1) / len(steps) * 100))
+            time.sleep(0.4)
 
-        try:
-            df=pd.read_csv(uploaded_file)
+        df = pd.read_csv(uploaded_file)
+        st.session_state.df = df
+        st.session_state.uploaded = True
 
-            st.session_state.df = df
-            st.session_state.uploaded=True
-
-            loader.empty()
-            progress.empty()
-
-
-        except Exception as e:
-            loader.error(f"Unable to read CSV.\n{e}")
+        loader.empty()
+        progress.empty()
 
         success = st.empty()
-
         success.success("✅ Dataset Uploaded Successfully! Preparing for Validation...")
-
-        time.sleep(2)
-
+        time.sleep(1.5)
         success.empty()
-        st.session_state.uploaded=True
-        st.session_state.df=df
+
+    except Exception as e:
+        loader.error(f"Unable to read CSV.\n{e}")
+        progress.empty()
+        # don't set uploaded flag or session df on failure
 
 #==========================================================================================================================================================================================
 #check for any missing columns in the dataset
