@@ -33,7 +33,7 @@ else:
     st.session_state.uploaded = False
 
 #===========================================================================================================================================================================================
-#checking and correcting for any missing values or duplicates values in the dataset
+#checking and correcting any missing values in the dataset
 #===========================================================================================================================================================================================
 @st.dialog("Fill Missing Values", width="large")
 def clean_data_modal():
@@ -122,7 +122,7 @@ if dataset is not None:
             st.session_state.modal_triggered = True
             clean_data_modal()
     else:
-        pop("🎉 Dataset is clean! No missing values remaining.")
+        pop("🎉 Dataset is Ready! No missing values remaining.")
 
     # Always show the current state of the dataset on the main page
     st.subheader("📊 Dataset Preview")
@@ -132,3 +132,83 @@ else:
     if "df_working" in st.session_state:
         del st.session_state.df_working
         st.session_state.modal_triggered = False
+
+#===========================================================================================================================================================================================
+#checking and correcting any duplicates values in the dataset
+#===========================================================================================================================================================================================
+
+@st.dialog("Handle Duplicate Rows", width="large")
+def handle_duplicates_modal():
+    # Fetch the dataset from session state
+    df = st.session_state.df_working
+    duplicate_rows = df[df.duplicated(keep=False)]
+    
+    st.write("Below are all the rows that have identical duplicates in the dataset:")
+    # Task 1: Show complete rows with any duplicates
+    st.dataframe(duplicate_rows)
+    
+    st.divider()
+    
+    # Task 2: Provide the 3 choices
+    action = st.radio(
+        "Choose an action:",
+        [
+            "1. Select and delete specific duplicate rows manually",
+            "2. Keep specific instances (First or Last)",
+            "3. Delete all duplicate rows entirely"
+        ]
+    )
+    
+    # --- CHOICE 1: SELECT AND DELETE ROWS MANUALLY ---
+    if action == "1. Select and delete specific duplicate rows manually":
+        rows_to_delete = st.multiselect(
+            "Select row indices to completely remove:",
+            options=duplicate_rows.index.tolist()
+        )
+        if st.button("Delete Selected Rows", type="primary"):
+            st.session_state.df_working = df.drop(index=rows_to_delete)
+            pop("Rows deleted successfully!")
+            st.rerun()
+
+    # --- CHOICE 2: KEEP SPECIFIC INSTANCES ---
+    elif action == "2. Keep specific instances (First or Last)":
+        keep_strategy = st.selectbox("Which instance do you want to keep?", ["Keep First occurrence", "Keep Last occurrence"])
+        
+        if st.button("Apply Keep Strategy", type="primary"):
+            strategy_val = "first" if keep_strategy == "Keep First occurrence" else "last"
+            st.session_state.df_working = df.drop_duplicates(keep=strategy_val)
+            pop("Duplicates dropped, keeping chosen occurrences!")
+            st.rerun()
+
+    # --- CHOICE 3: DELETE ALL THE ROWS ---
+    elif action == "3. Delete all duplicate rows entirely":
+        st.warning("This will completely drop ALL instances of duplicate rows, leaving none behind.")
+        if st.button("Confirm Complete Deletion", type="primary"):
+            st.session_state.df_working = df.drop_duplicates(keep=False)
+            pop("All duplicate instances dropped successfully!")
+            st.rerun()
+
+
+# --- Main App Execution Logic for Duplicates ---
+if dataset is not None:
+    # Read the data once and save it to the session state (already done in your main file)
+    if "df_working" not in st.session_state:
+        st.session_state.df_working = pd.read_csv(dataset)
+        st.session_state.duplicate_modal_triggered = False
+
+    df_current = st.session_state.df_working
+    has_duplicates = df_current.duplicated().any()
+
+    # If duplicate values exist and we haven't resolved them yet
+    if has_duplicates:
+        # Show a warning button to open/reopen the modal
+        st.error("⚠️ This dataset contains duplicate rows.")
+        if st.button("🔧 Open Duplicate Handling Window") or not st.session_state.get('duplicate_modal_triggered', False):
+            st.session_state.duplicate_modal_triggered = True
+            handle_duplicates_modal()
+    else:
+        pop("🎉 Dataset is Clean! No duplicate rows remaining.")
+
+    # Always show the current state of the dataset on the main page
+    st.subheader("📊 Dataset Preview")
+    st.dataframe(df_current)
