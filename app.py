@@ -181,8 +181,6 @@ transform:scale(1.01);
 
 if not st.session_state.uploaded:
 
-    st.markdown("<h1 style='text-align:center;'>🎬 MovieIQ</h1>",unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;color:gray;'>Intelligent Movie Dataset Analysis & Prediction Platform</p>",unsafe_allow_html=True)
 
     uploaded_file=st.file_uploader(
         "Drag & Drop your CSV here or Click to Upload",
@@ -227,11 +225,36 @@ if not st.session_state.uploaded:
 
 else:
 
-    df=st.session_state.df
+    df = st.session_state.df
 
-    st.toast("✅ Dataset Ready For Analysis",icon="🎬")
+    st.markdown("""
+    <style>
+    [data-testid="stFileUploader"]{
+        width:30%;
+        margin-left:auto;
+        margin-right:0;
+        margin-bottom:15px;
+    }
 
-    st.success("Dataset is loaded successfully.")
+    [data-testid="stFileUploader"] section{
+        padding:12px;
+        border-radius:12px;
+        font-size:13px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    uploaded_file = st.file_uploader(
+        "Replace Dataset",
+        type=["csv"],
+        label_visibility="collapsed"
+    )
+
+    if uploaded_file:
+        st.session_state.df = pd.read_csv(uploaded_file)
+        st.rerun()
+
+    # Continue with validation, cleaning and dashboard below...
 
 #==========================================================================================================================================================================================
 #upload the dataset
