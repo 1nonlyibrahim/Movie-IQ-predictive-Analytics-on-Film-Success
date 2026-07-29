@@ -16,33 +16,102 @@ st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h
 
 st.markdown("<p style='text-align: center;'>Analyze and explore your movie dataset instantly.</p>", unsafe_allow_html=True)
 
-def pop(m, duration=3000):
-    """
-    Displays a full-screen loading overlay for a short duration.
-    """
-    unique_id = int(time.time() * 1000)
+import streamlit as st
+import time
+
+def init_notif_engine():
+    if "notif_engine_initialized" not in st.session_state:
+        st.session_state.notif_engine_initialized = True
+        st.markdown(
+            """
+            <script>
+            window.notifQueue = window.notifQueue || [];
+            window.notifIsProcessing = false;
+
+            window.processNotifQueue = function() {
+                if (window.notifQueue.length === 0) {
+                    window.notifIsProcessing = false;
+                    return;
+                }
+                
+                window.notifIsProcessing = true;
+                const message = window.notifQueue.shift();
+
+                const el = document.createElement('div');
+                el.style.position = 'fixed';
+                el.style.left = '50%';
+                el.style.transform = 'translateX(-50%)';
+                el.style.background = '#d4edda';
+                el.style.color = '#155724';
+                el.style.padding = '14px 28px';
+                el.style.borderRadius = '8px';
+                el.style.fontFamily = 'sans-serif';
+                el.style.fontWeight = 'bold';
+                el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                el.style.zIndex = '999999';
+                el.style.width = 'max-content';
+                el.style.display = 'flex';
+                el.style.alignItems = 'center';
+                el.style.gap = '12px';
+                el.style.animation = 'slideInOut 3s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+
+                el.innerHTML = `
+                    <div class="notif-spinner"></div>
+                    <span>${message}</span>
+                `;
+
+                document.body.appendChild(el);
+
+                setTimeout(() => {
+                    el.remove();
+                    window.processNotifQueue();
+                }, 3000);
+            };
+            </script>
+            <style>
+                @keyframes slideInOut {
+                    0% { top: -100px; opacity: 0; }
+                    15% { top: 30px; opacity: 1; }
+                    85% { top: 30px; opacity: 1; }
+                    100% { top: -100px; opacity: 0; }
+                }
+                @keyframes rotateSpinner {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .notif-spinner {
+                    width: 18px;
+                    height: 18px;
+                    border: 3px solid #c3e6cb;
+                    border-top: 3px solid #155724;
+                    border-radius: 50%;
+                    animation: rotateSpinner 1s linear infinite;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+def pop(m):
+    uid = int(time.time() * 1000000) + hash(m) % 1000
     st.markdown(
         f"""
-        <div id="loading-screen-{unique_id}" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0, 0, 0, 0.75); z-index:999999;">
-            <div style="text-align:center; padding:32px 36px; border-radius:20px; background:rgba(255,255,255,0.12); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.18);">
-                <div style="width:60px; height:60px; margin:0 auto 22px auto; border:6px solid rgba(255,255,255,0.25); border-top-color:#ffd700; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                <div style="color:#ffffff; font-size:20px; font-weight:700;">{m}</div>
-            </div>
-        </div>
-        <style>
-            @keyframes spin {{
-                0% {{ transform: rotate(0deg); }}
-                100% {{ transform: rotate(360deg); }}
-            }}
-        </style>
+        <div id="notif-trigger-{uid}" style="display:none;"></div>
         <script>
-            setTimeout(function() {{
-                const el = document.getElementById("loading-screen-{unique_id}");
-                if (el) el.remove();
-            }}, {duration});
+        (function() {{
+            window.notifQueue = window.notifQueue || [];
+            window.notifQueue.push("{m}");
+            
+            if (!window.notifIsProcessing) {{
+                window.notifIsProcessing = true;
+                setTimeout(() => {{
+                    window.processNotifQueue();
+                }}, 10);
+            }}
+        }})();
         </script>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 if "uploaded" not in st.session_state:
