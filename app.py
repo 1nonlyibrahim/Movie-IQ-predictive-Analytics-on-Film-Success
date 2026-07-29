@@ -1,31 +1,5 @@
-import time
 import streamlit as st
 import pandas as pd
-import os
-import base64
-
-IMAGE_URL = "https://share.google/ON4aLVmlPCQkMqXT7"
-
-st.markdown(
-    f"""
-    <style>
-    .stAppViewContainer {{
-        background-image: url("{IMAGE_URL}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    .stHeader {{
-        background: transparent !important;
-    }}
-    h1, h2, h3, p, span, label, li {{
-        color: #ffffff !important;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 #===========================================================================================================================================================================================
 #Add File Upload box & main heads
