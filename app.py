@@ -314,10 +314,60 @@ if st.session_state.uploaded:
         st.session_state.validation_complete = True
 
         st.info(
-            "Next Step → Missing Value Detection (Part B)"
+            "Next Step → Missing Value Detection"
         )
 
 #==========================================================================================================================================================================================
 #check for any missing values in the dataset
 #==========================================================================================================================================================================================
 
+
+
+#==========================================================================================================================================================================================
+#check for any duplicate values in the dataset
+#==========================================================================================================================================================================================
+
+
+
+#==========================================================================================================================================================================================
+#validation completion and analysis readiness
+#==========================================================================================================================================================================================
+
+if "dashboard_ready" not in st.session_state:
+    st.session_state.dashboard_ready = False
+
+if st.session_state.uploaded:
+
+    df = st.session_state.df
+
+    missing_columns = [
+        c for c in REQUIRED_COLUMNS
+        if c not in df.columns
+    ]
+
+    if len(missing_columns) == 0:
+
+        missing = df.isna().sum().sum()
+        duplicates = df.duplicated().sum()
+
+        if missing == 0 and duplicates == 0:
+
+            st.session_state.dashboard_ready = True
+
+        else:
+
+            st.warning(
+                f"""
+Dataset requires cleaning before analysis.
+
+Missing Values : {missing}
+
+Duplicate Rows : {duplicates}
+"""
+            )
+
+            st.info(
+                "Cleaning module will be implemented later."
+            )
+
+            st.stop()
