@@ -256,9 +256,9 @@ if st.session_state.uploaded:
             progress = st.progress(0)
             status = st.empty()
 
-            status.info("🔍 Step 1 / 3 : Checking Required Columns...")
+            status.info("🔍 Step 1 / 4 : Checking Required Columns...")
 
-            progress.progress(15)
+            progress.progress(0)
 
             time.sleep(0.8)
 
@@ -276,7 +276,7 @@ if st.session_state.uploaded:
                 if col not in df_local.columns
             ]
 
-            progress.progress(33)
+            progress.progress(0)
 
             if missing_columns:
 
@@ -295,15 +295,15 @@ if st.session_state.uploaded:
 
                 st.stop()
 
-            progress.progress(100)
+            progress.progress(25)
 
             status.success("✅ Required Columns Verified")
 
             time.sleep(1)
 
-            status.info("🧹 Step 2 / 3 : Checking Missing Values...")
+            status.info("🧹 Step 2 / 4 : Checking Missing Values...")
 
-            progress.progress(45)
+            progress.progress(25)
 
             time.sleep(0.8)
 
@@ -311,7 +311,7 @@ if st.session_state.uploaded:
 
             if missing_count == 0:
 
-                progress.progress(66)
+                progress.progress(25)
 
                 status.success("✅ No Missing Values Found")
 
@@ -333,7 +333,7 @@ if st.session_state.uploaded:
 
                 st.session_state.df = df_local
 
-                progress.progress(66)
+                progress.progress(50)
 
                 status.success(
                     f"✅ Removed {removed_rows} row(s) containing missing values."
@@ -343,9 +343,9 @@ if st.session_state.uploaded:
 
             # -------------------- STEP 3 : DUPLICATE VALUE CHECK --------------------
 
-            status.info("📑 Step 3 / 3 : Checking Duplicate Values...")
+            status.info("📑 Step 3 / 4 : Checking Duplicate Values...")
 
-            progress.progress(75)
+            progress.progress(50)
 
             time.sleep(0.8)
 
@@ -353,7 +353,7 @@ if st.session_state.uploaded:
 
             if duplicate_count == 0:
 
-                progress.progress(100)
+                progress.progress(50
 
                 status.success("✅ No Duplicate Rows Found")
 
@@ -375,7 +375,7 @@ if st.session_state.uploaded:
 
                 st.session_state.df = df_local
 
-                progress.progress(100)
+                progress.progress(75)
 
                 status.success(
                     f"✅ Removed {removed_rows} duplicate row(s)."
@@ -384,7 +384,7 @@ if st.session_state.uploaded:
                 time.sleep(1)
             status.info("🔄 Step 4 / 4 : Correcting Column Data Types...")
 
-            progress.progress(90)
+            progress.progress(75)
 
             time.sleep(0.8)
 
