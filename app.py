@@ -220,7 +220,7 @@ if not st.session_state.uploaded:
 
         success = st.empty()
 
-        success.success("✅ Dataset Uploaded Successfully! Preparing analysis dashboard...")
+        success.success("✅ Dataset Uploaded Successfully! Preparing for Validation...")
 
         time.sleep(2)
 
@@ -235,7 +235,7 @@ if not st.session_state.uploaded:
 REQUIRED_COLUMNS = [
     "title",
     "budget",
-    "revenue",
+    "revenue",  
     "genres",
     "runtime",
     "popularity",
@@ -254,17 +254,21 @@ if st.session_state.uploaded:
 
     st.divider()
 
-    if not st.session_state.validation_started:
-
-        if st.button(
-            "🚀 Start Data Validation",
-            use_container_width=True,
-            type="primary"
-        ):
-            st.session_state.validation_started = True
-            st.rerun()
-
     if st.session_state.validation_started:
+
+        @st.dialog("🔍 Dataset Validation", width="large")
+        def validation_window():
+
+            col1, col2, col3 = st.columns([1,2,1])
+
+            with col2:
+                if st.button(
+                    "🚀 Start Data Validation",
+                    type="primary"
+                ):
+                    st.session_state.validation_started = True
+
+        validation_window()
 
         progress = st.progress(0)
         status = st.empty()
@@ -316,7 +320,6 @@ if st.session_state.uploaded:
         st.info(
             "Next Step → Missing Value Detection"
         )
-
 #==========================================================================================================================================================================================
 #check for any missing values in the dataset
 #==========================================================================================================================================================================================
