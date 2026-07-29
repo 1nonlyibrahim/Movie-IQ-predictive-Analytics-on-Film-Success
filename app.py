@@ -311,52 +311,52 @@ if st.session_state.uploaded:
                 st.session_state.validation_started = True
                 validation_window()
 
-#==========================================================================================================================================================================================
-#check for any missing values in the dataset
-#==========================================================================================================================================================================================
-# Ensure status and progress placeholders exist (may be created inside dialog earlier)
-progress = globals().get("progress") or st.progress(0)
-status = globals().get("status") or st.empty()
+    #==========================================================================================================================================================================================
+    #check for any missing values in the dataset
+    #==========================================================================================================================================================================================
+    # Ensure status and progress placeholders exist (may be created inside dialog earlier)
+    progress = globals().get("progress") or st.progress(0)
+    status = globals().get("status") or st.empty()
 
-status.info("🧹 Step 2 / 3 : Checking Missing Values...")
+    status.info("🧹 Step 2 / 3 : Checking Missing Values...")
 
-progress.progress(45)
-
-time.sleep(0.8)
-
-missing_count = int(df.isnull().sum().sum())
-
-if missing_count == 0:
-
-    progress.progress(66)
-
-    status.success("✅ No Missing Values Found")
-
-    time.sleep(1)
-
-else:
-
-    status.warning(
-        f"⚠ {missing_count} missing values detected."
-    )
+    progress.progress(45)
 
     time.sleep(0.8)
 
-    original_rows = len(df)
+    missing_count = int(df.isnull().sum().sum())
 
-    df = df.dropna().reset_index(drop=True)
+    if missing_count == 0:
 
-    removed_rows = original_rows - len(df)
+        progress.progress(66)
 
-    st.session_state.df = df
+        status.success("✅ No Missing Values Found")
 
-    progress.progress(66)
+        time.sleep(1)
 
-    status.success(
-        f"✅ Removed {removed_rows} row(s) containing missing values."
-    )
+    else:
 
-    time.sleep(1)
+        status.warning(
+            f"⚠ {missing_count} missing values detected."
+        )
+
+        time.sleep(0.8)
+
+        original_rows = len(df)
+
+        df = df.dropna().reset_index(drop=True)
+
+        removed_rows = original_rows - len(df)
+
+        st.session_state.df = df
+
+        progress.progress(66)
+
+        status.success(
+            f"✅ Removed {removed_rows} row(s) containing missing values."
+        )
+
+        time.sleep(1)
 #==========================================================================================================================================================================================
 #check for any duplicate values in the dataset
 #==========================================================================================================================================================================================
