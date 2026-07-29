@@ -16,8 +16,111 @@ st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h
 
 st.markdown("<p style='text-align: center;'>Analyze and explore your movie dataset instantly.</p>", unsafe_allow_html=True)
 
+import streamlit as st
+
 def pop(m):
-    st.markdown(f'<div style="position:fixed;left:50%;transform:translateX(-50%);background:#d4edda;color:#155724;padding:14px 28px;border-radius:8px;font-family:sans-serif;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999999;width:max-content;animation:s 3s cubic-bezier(0.25,1,0.5,1) forwards">{m}</div><style>@keyframes s{{0%{{top:-100px;opacity:0}}15%{{top:30px;opacity:1}}85%{{top:30px;opacity:1}}100%{{top:-100px;opacity:0}}}}</style>', unsafe_allow_html=True)
+    """
+    Displays a sequential notification with a rotating loader animation.
+    If multiple notifications are triggered, they queue up and play one after another.
+    """
+    # Create a unique key for each message to force Streamlit to render it
+    import time
+    unique_id = int(time.time() * 1000)
+    
+    st.markdown(
+        f"""
+        <div id="notif-container-{unique_id}" style="display:none;"></div>
+        <script>
+        (function() {{
+            // 1. Initialize a global queue if it doesn't exist
+            window.notifQueue = window.notifQueue || [];
+            window.notifIsProcessing = window.notifIsProcessing || false;
+
+            // 2. Add the new message to the queue
+            window.notifQueue.push("{m}");
+
+            // 3. Queue processing logic
+            function processQueue() {{
+                if (window.notifQueue.length === 0) {{
+                    window.notifIsProcessing = false;
+                    return;
+                }}
+                
+                window.notifIsProcessing = true;
+                const message = window.notifQueue.shift();
+
+                // Create the notification element dynamically
+                const el = document.createElement('div');
+                el.style.position = 'fixed';
+                el.style.left = '50%';
+                el.style.transform = 'translateX(-50%)';
+                el.style.background = '#d4edda';
+                el.style.color = '#155724';
+                el.style.padding = '14px 28px';
+                el.style.borderRadius = '8px';
+                el.style.fontFamily = 'sans-serif';
+                el.style.fontWeight = 'bold';
+                el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                el.style.zIndex = '999999';
+                el.style.width = 'max-content';
+                el.style.display = 'flex';
+                el.style.alignItems = 'center';
+                el.style.gap = '12px';
+                
+                // CSS Animation for entry/exit sliding
+                el.style.animation = 'slideInOut 3s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+
+                // Inject the rotating spinner and text
+                el.innerHTML = `
+                    <div class="notif-spinner"></div>
+                    <span>${{message}}</span>
+                `;
+
+                // Inject keyframes and spinner styles if not already present
+                if (!document.getElementById('notif-styles')) {{
+                    const style = document.createElement('style');
+                    style.id = 'notif-styles';
+                    style.innerHTML = `
+                        @keyframes slideInOut {{
+                            0% {{ top: -100px; opacity: 0; }}
+                            15% {{ top: 30px; opacity: 1; }}
+                            85% {{ top: 30px; opacity: 1; }}
+                            100% {{ top: -100px; opacity: 0; }}
+                        }}
+                        @keyframes rotateSpinner {{
+                            0% {{ transform: rotate(0deg); }}
+                            100% {{ transform: rotate(360deg); }}
+                        }}
+                        .notif-spinner {{
+                            width: 18px;
+                            height: 18px;
+                            border: 3px solid #c3e6cb;
+                            border-top: 3px solid #155724;
+                            border-radius: 50%;
+                            animation: rotateSpinner 1s linear infinite;
+                        }}
+                    `;
+                    document.head.appendChild(style);
+                }}
+
+                document.body.appendChild(el);
+
+                // Wait for the 3-second animation to finish, then clean up and check queue
+                setTimeout(() => {{
+                    el.remove();
+                    processQueue();
+                }}, 3000);
+            }}
+
+            // Start processing if idle
+            if (!window.notifIsProcessing) {{
+                processQueue();
+            }}
+        }})();
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
 
 if "uploaded" not in st.session_state:
     st.session_state.uploaded = False
@@ -60,11 +163,7 @@ if dataset is not None:
         # Force stop execution here to prevent further analysis charts/tables from rendering
         st.stop()
     else:
-        st.success("✅ Movie dataset columns are complete! Proceeding to analysis...")
-        
-    # --- ALL YOUR ANALYSIS CODE GOES BELOW THIS LINE ---
-    st.subheader("📊 Movie Dataset Preview")
-    st.dataframe(df_current[existing_cols])
+        pop("✅ Movie dataset columns are complete! Proceeding to analysis...")
 
 
 #===========================================================================================================================================================================================
