@@ -463,9 +463,122 @@ if st.session_state.uploaded:
                 st.session_state.validation_started = True
                 validation_window()
 #==========================================================================================================================================================================================
-#check for any duplicate values in the dataset
+#sidebar to show dataset information and statistics
 #==========================================================================================================================================================================================
+# ====================== SIDEBAR ======================
 
-#==========================================================================================================================================================================================
-#validation completion and analysis readiness
-#==========================================================================================================================================================================================
+if st.session_state.validation_complete:
+
+    df = st.session_state.df
+
+    st.sidebar.title("🎬 MovieIQ")
+
+    st.sidebar.success("Dataset Ready for Analysis")
+
+    st.sidebar.divider()
+
+    # ---------------- Dataset Status ---------------- #
+
+    st.sidebar.subheader("📂 Dataset Status")
+
+    st.sidebar.metric("Rows", f"{df.shape[0]:,}")
+    st.sidebar.metric("Columns", df.shape[1])
+
+    memory = df.memory_usage(deep=True).sum() / (1024**2)
+
+    st.sidebar.metric(
+        "Memory Usage",
+        f"{memory:.2f} MB"
+    )
+
+    st.sidebar.metric(
+        "Missing Values",
+        int(df.isnull().sum().sum())
+    )
+
+    st.sidebar.metric(
+        "Duplicate Rows",
+        int(df.duplicated().sum())
+    )
+
+    numeric_df = df.select_dtypes(include="number")
+
+    outliers = 0
+
+    for col in numeric_df.columns:
+
+        q1 = numeric_df[col].quantile(0.25)
+        q3 = numeric_df[col].quantile(0.75)
+
+        iqr = q3 - q1
+
+        outliers += (
+            (
+                (numeric_df[col] < (q1 - 1.5 * iqr)) |
+                (numeric_df[col] > (q3 + 1.5 * iqr))
+            )
+        ).sum()
+
+    st.sidebar.metric(
+        "Outlier Count",
+        int(outliers)
+    )
+
+    st.sidebar.metric(
+        "Target Variable",
+        "Available" if "success" in df.columns else "Not Created"
+    )
+
+    st.sidebar.divider()
+
+    # ---------------- Dataset Preview ---------------- #
+
+    with st.sidebar.expander("👀 Dataset Preview"):
+
+        st.dataframe(
+            df.head(),
+            use_container_width=True
+        )
+
+    # ---------------- Column Information ---------------- #
+
+    with st.sidebar.expander("🧾 Column Information"):
+
+        info = pd.DataFrame({
+            "Column": df.columns,
+            "Datatype": df.dtypes.astype(str),
+            "Missing": df.isnull().sum().values,
+            "Unique": df.nunique().values
+        })
+
+        st.dataframe(
+            info,
+            use_container_width=True,
+            height=300
+        )
+
+    # ---------------- Summary Statistics ---------------- #
+
+    with st.sidebar.expander("📈 Summary Statistics"):
+
+        st.dataframe(
+            df.describe(include="all").transpose(),
+            use_container_width=True,
+            height=350
+        )
+
+    # ---------------- Data Cleaning Report ---------------- #
+
+    with st.sidebar.expander("🧹 Data Cleaning Report"):
+
+        st.success("Validation Completed")
+
+        st.write(f"**Final Shape :** {df.shape}")
+
+        st.write(f"**Missing Values :** {int(df.isnull().sum().sum())}")
+
+        st.write(f"**Duplicate Rows :** {int(df.duplicated().sum())}")
+
+        st.write(
+            f"**Success Column :** {'Yes' if 'success' in df.columns else 'No'}"
+        )
