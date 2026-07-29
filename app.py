@@ -5,8 +5,7 @@ import os
 import base64
 
 def get_base64_image():
-    """Locates 'bg' image in the local script directory with common extensions."""
-    # List of extensions to check automatically
+    """Locates 'bg' image in the cloud workspace directory."""
     extensions = [".jpg", ".png", ".jpeg", ".JPG", ".PNG"]
 
     for ext in extensions:
@@ -14,17 +13,13 @@ def get_base64_image():
         if os.path.exists(filename):
             with open(filename, "rb") as f:
                 data = f.read()
-            # Return both the base64 data and the extension type for the CSS
             return base64.b64encode(data).decode(), ext.replace(".", "")
-
     return None, None
 
 
-# Attempt to automatically find and load the background image locally
 img_base64, img_type = get_base64_image()
 
 if img_base64:
-    # Inject CSS to set your background image seamlessly
     st.markdown(
         f"""
         <style>
@@ -38,7 +33,6 @@ if img_base64:
         .stHeader {{
             background: transparent !important;
         }}
-        /* Global text formatting to ensure perfect contrast against the background */
         h1, h2, h3, p, span, label, li {{
             color: #ffffff !important;
         }}
@@ -47,10 +41,8 @@ if img_base64:
         unsafe_allow_html=True,
     )
 else:
-    # Diagnostic helper to guide you if it's placed incorrectly
-    current_folder = os.getcwd()
     st.error(
-        f"❌ Background asset missing! Please place your image file inside this exact folder: **{current_folder}** and rename the file to **bg**."
+        "🎬 Almost there! Please push your image named 'bg.jpg' or 'bg.png' directly to your GitHub repository root folder."
     )
 
 #===========================================================================================================================================================================================
