@@ -154,16 +154,20 @@ if __name__ == "__main__":
 #==========================================================================================================================================================================================
 #upload the dataset
 #==========================================================================================================================================================================================
+if "df" not in st.session_state:
+    st.session_state.df = None
+
+if "uploaded" not in st.session_state:
+    st.session_state.uploaded = False
 
 st.markdown("""
 <style>
 .block-container{padding-top:2rem;}
-h1{text-align:center;}
 [data-testid="stFileUploader"]{width:70%;margin:auto;}
 [data-testid="stFileUploader"] section{
 border:2px dashed #4F8BF9;
 border-radius:18px;
-padding:55px;
+padding:60px;
 background:#181818;
 transition:.3s;
 }
@@ -173,33 +177,63 @@ background:#222;
 transform:scale(1.01);
 }
 </style>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader(
-    "Drag & Drop your CSV here or Click to Upload",
-    type="csv",
-    help="Only CSV files are supported."
-)
+if not st.session_state.uploaded:
 
-if uploaded_file:
-    progress = st.progress(0)
-    status = st.empty()
+    st.markdown("<h1 style='text-align:center;'>🎬 MovieIQ</h1>",unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;color:gray;'>Intelligent Movie Dataset Analysis & Prediction Platform</p>",unsafe_allow_html=True)
 
-    steps = [
-        "📂 Reading Dataset...",
-        "🔍 Validating Structure...",
-        "🧹 Detecting Missing Values...",
-        "📑 Checking Duplicate Records...",
-        "⚙️ Preparing Dashboard...",
-        "✅ Finalizing..."
-    ]
+    uploaded_file=st.file_uploader(
+        "Drag & Drop your CSV here or Click to Upload",
+        type=["csv"],
+        help="Only CSV files are supported."
+    )
 
-    for i, step in enumerate(steps):
-        status.info(step)
-        progress.progress(int((i + 1) / len(steps) * 100))
-        time.sleep(0.5)
+    if uploaded_file:
 
-    df = pd.read_csv(uploaded_file)
+        loader=st.empty()
+        progress=st.progress(0)
 
-    st.toast("🎉 Dataset Uploaded Successfully!", icon="✅")
-    st.success("Dataset is ready for analysis.")
+        steps=[
+            "📂 Reading Dataset...",
+            "📄 Parsing CSV...",
+            "🔍 Validating File...",
+            "⚙ Preparing Workspace...",
+            "🚀 Almost Ready..."
+        ]
+
+        for i,s in enumerate(steps):
+            loader.info(s)
+            progress.progress(int((i+1)/len(steps)*100))
+            time.sleep(0.6)
+
+        try:
+            df=pd.read_csv(uploaded_file)
+
+            st.session_state.df=df
+            st.session_state.uploaded=True
+
+            loader.empty()
+            progress.empty()
+
+            st.toast("🎉 Dataset Uploaded Successfully!",icon="✅")
+            st.success("Dataset uploaded successfully. Preparing analysis dashboard...")
+
+            st.rerun()
+
+        except Exception as e:
+            loader.error(f"Unable to read CSV.\n{e}")
+
+else:
+
+    df=st.session_state.df
+
+    st.toast("✅ Dataset Ready For Analysis",icon="🎬")
+
+    st.success("Dataset is loaded successfully.")
+
+#==========================================================================================================================================================================================
+#upload the dataset
+#==========================================================================================================================================================================================
+
