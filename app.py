@@ -16,9 +16,6 @@ st.markdown("<h1 style='text-align: center;'>MOVIE IQ: FILM SUCCESS PREDICTOR</h
 
 st.markdown("<p style='text-align: center;'>Analyze and explore your movie dataset instantly.</p>", unsafe_allow_html=True)
 
-import streamlit as st
-import time
-
 def init_notif_engine():
     if "notif_engine_initialized" not in st.session_state:
         st.session_state.notif_engine_initialized = True
@@ -27,18 +24,28 @@ def init_notif_engine():
             <script>
             window.notifQueue = window.notifQueue || [];
             window.notifIsProcessing = false;
+            window.currentNotifElement = null;
 
             window.processNotifQueue = function() {
                 if (window.notifQueue.length === 0) {
                     window.notifIsProcessing = false;
+                    if (window.currentNotifElement) {
+                        window.currentNotifElement.remove();
+                        window.currentNotifElement = null;
+                    }
                     return;
                 }
                 
                 window.notifIsProcessing = true;
                 const message = window.notifQueue.shift();
 
+                if (window.currentNotifElement) {
+                    window.currentNotifElement.remove();
+                }
+
                 const el = document.createElement('div');
                 el.style.position = 'fixed';
+                el.style.top = '30px';
                 el.style.left = '50%';
                 el.style.transform = 'translateX(-50%)';
                 el.style.background = '#d4edda';
@@ -53,7 +60,7 @@ def init_notif_engine():
                 el.style.display = 'flex';
                 el.style.alignItems = 'center';
                 el.style.gap = '12px';
-                el.style.animation = 'slideInOut 3s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+                el.style.animation = 'fadeInOut 0.3s ease-in-out forwards';
 
                 el.innerHTML = `
                     <div class="notif-spinner"></div>
@@ -61,19 +68,19 @@ def init_notif_engine():
                 `;
 
                 document.body.appendChild(el);
+                window.currentNotifElement = el;
 
                 setTimeout(() => {
-                    el.remove();
-                    window.processNotifQueue();
+                    if (window.currentNotifElement === el) {
+                        window.processNotifQueue();
+                    }
                 }, 3000);
             };
             </script>
             <style>
-                @keyframes slideInOut {
-                    0% { top: -100px; opacity: 0; }
-                    15% { top: 30px; opacity: 1; }
-                    85% { top: 30px; opacity: 1; }
-                    100% { top: -100px; opacity: 0; }
+                @keyframes fadeInOut {
+                    0% { opacity: 0; }
+                    100% { opacity: 1; }
                 }
                 @keyframes rotateSpinner {
                     0% { transform: rotate(0deg); }
