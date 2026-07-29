@@ -260,7 +260,7 @@ if st.session_state.uploaded:
 
             progress.progress(0)
 
-            time.sleep(0.8)
+            time.sleep(1.5)
 
             # Safely fetch the dataframe from session state to avoid
             # any local variable shadowing / UnboundLocalError.
@@ -299,13 +299,13 @@ if st.session_state.uploaded:
 
             status.success("✅ Required Columns Verified")
 
-            time.sleep(1)
+            time.sleep(1.5)
 
             status.info("🧹 Step 2 / 4 : Checking Missing Values...")
 
             progress.progress(25)
 
-            time.sleep(0.8)
+            time.sleep(1.5)
 
             missing_count = int(df_local.isnull().sum().sum())
 
@@ -315,7 +315,7 @@ if st.session_state.uploaded:
 
                 status.success("✅ No Missing Values Found")
 
-                time.sleep(1)
+                time.sleep(1.5)
 
             else:
 
@@ -323,7 +323,7 @@ if st.session_state.uploaded:
                     f"⚠ {missing_count} missing values detected."
                 )
 
-                time.sleep(0.8)
+                time.sleep(1.5)
 
                 original_rows = len(df_local)
 
@@ -347,7 +347,7 @@ if st.session_state.uploaded:
 
             progress.progress(50)
 
-            time.sleep(0.8)
+            time.sleep(1.5)
 
             duplicate_count = int(df_local.duplicated().sum())
 
@@ -357,7 +357,7 @@ if st.session_state.uploaded:
 
                 status.success("✅ No Duplicate Rows Found")
 
-                time.sleep(1)
+                time.sleep(1.5)
 
             else:
 
@@ -365,7 +365,7 @@ if st.session_state.uploaded:
                     f"⚠ {duplicate_count} duplicate row(s) detected."
                 )
 
-                time.sleep(0.8)
+                time.sleep(1.5)
 
                 original_rows = len(df_local)
 
@@ -381,12 +381,12 @@ if st.session_state.uploaded:
                     f"✅ Removed {removed_rows} duplicate row(s)."
                 )
 
-                time.sleep(1)
+                time.sleep(1.5)
             status.info("🔄 Step 4 / 4 : Correcting Column Data Types...")
 
             progress.progress(75)
 
-            time.sleep(0.8)
+            time.sleep(1.5)
 
             # Numeric Columns
             numeric_columns = [
@@ -452,7 +452,7 @@ if st.session_state.uploaded:
 
             st.session_state.validation_complete = True
 
-            time.sleep(1)
+            time.sleep(3)
 
             st.rerun()
         
@@ -527,7 +527,8 @@ if st.session_state.validation_complete:
 
     st.sidebar.metric(
         "Target Variable",
-        "Available" if "success" in df.columns else "Not Created"
+        "Available" if "success" in df.columns else "Not Created",
+        help="The target variable is the output that the machine learning model predicts. In this application, a movie is labeled as Successful (1) if its revenue is greater than its budget, otherwise it is labeled as Not Successful (0)."
     )
 
     st.sidebar.divider()
