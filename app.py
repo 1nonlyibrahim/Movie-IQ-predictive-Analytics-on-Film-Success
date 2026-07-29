@@ -450,7 +450,7 @@ if st.session_state.uploaded:
         # Centered button to open the validation dialog
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-              if not st.session_state.validation_complete:
+            if not st.session_state.validation_complete:
                 if st.button("Perform Data Validation", type="primary", use_container_width=True):
                     st.session_state.validation_started = True
                     validation_window()
@@ -584,24 +584,19 @@ if st.session_state.validation_complete:
     #==========================================================================================================================================================================================
     #KPI cards
     #==========================================================================================================================================================================================
-    def format_indian(num):
+    def format_currency_indian(num):
         num = float(num)
-        sign = "-" if num < 0 else ""
-        num = abs(num)
 
-        integer, decimal = f"{num:.2f}".split(".")
-        if len(integer) > 3:
-            last3 = integer[-3:]
-            rest = integer[:-3]
-            parts = []
-            while len(rest) > 2:
-                parts.insert(0, rest[-2:])
-                rest = rest[:-2]
-            if rest:
-                parts.insert(0, rest)
-            integer = ",".join(parts + [last3])
+        if abs(num) >= 1e7:      # 1 Crore
+            return f"₹{num/1e7:,.2f} Cr"
 
-        return f"{sign}₹{integer}.{decimal}"
+        elif abs(num) >= 1e5:    # 1 Lakh
+            return f"₹{num/1e5:,.2f} L"
+
+        elif abs(num) >= 1e3:    # 1 Thousand
+            return f"₹{num/1e3:,.2f} K"
+
+        return f"₹{num:,.2f}"
 
     st.markdown("## 📊 Executive Overview")
 
