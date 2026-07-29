@@ -187,7 +187,7 @@ if not st.session_state.uploaded:
     help="Only CSV files are supported."
 )
 
-if uploaded_file and not st.session_state.uploaded:
+    if uploaded_file and not st.session_state.uploaded:
 
         loader=st.empty()
         progress=st.progress(0)
