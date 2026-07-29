@@ -33,6 +33,41 @@ else:
     st.session_state.uploaded = False
 
 #===========================================================================================================================================================================================
+#verifying wether dataset has all required columns or not
+#===========================================================================================================================================================================================
+
+# --- Quick Gatekeeper Check for Specific Columns ---
+if dataset is not None:
+    # Initialize session state if not present
+    if "df_working" not in st.session_state:
+        st.session_state.df_working = pd.read_csv(dataset)
+
+    df_current = st.session_state.df_working
+    
+    # Define your specific target columns
+    required_columns = ['budget', 'revenue', 'runtime', 'vote_average', 'title', 'genres']
+    
+    # Ensure all target columns actually exist in the dataframe before checking
+    existing_cols = [col for col in required_columns if col in df_current.columns]
+    
+    # Quick check: returns True if ANY cell in these specific columns is missing
+    is_dataset_incomplete = df_current[existing_cols].isnull().any().any()
+
+    if is_dataset_incomplete:
+        st.error("🛑 Analysis Halted: Required movie data columns contain missing values.")
+        st.info("Please fill or remove missing data in your core fields (budget, revenue, runtime, vote_average, title, genres) to proceed.")
+        
+        # Force stop execution here to prevent further analysis charts/tables from rendering
+        st.stop()
+    else:
+        st.success("✅ Movie dataset columns are complete! Proceeding to analysis...")
+        
+    # --- ALL YOUR ANALYSIS CODE GOES BELOW THIS LINE ---
+    st.subheader("📊 Movie Dataset Preview")
+    st.dataframe(df_current[existing_cols])
+
+
+#===========================================================================================================================================================================================
 #checking and correcting any missing values in the dataset
 #===========================================================================================================================================================================================
 @st.dialog("Fill Missing Values", width="large")
@@ -124,9 +159,6 @@ if dataset is not None:
     else:
         pop("🎉 Dataset is Ready! No missing values remaining.")
 
-    # Always show the current state of the dataset on the main page
-    st.subheader("📊 Dataset Preview")
-    st.dataframe(df_current)
 else:
     # Clear session data if the file is removed
     if "df_working" in st.session_state:
