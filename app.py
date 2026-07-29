@@ -135,7 +135,6 @@ if dataset is not None:
 #===========================================================================================================================================================================================
 # checking and correcting any missing values in the dataset
 #===========================================================================================================================================================================================
-@st.dialog("Fill Missing Values", width="large")
 def clean_data_modal():
     # Fetch the dataset from session state
     df = st.session_state.df_working
@@ -205,3 +204,9 @@ def clean_data_modal():
             pop("All rows containing empty columns removed!")
             close_pop()
             st.rerun()
+
+# Provide a simple trigger to open the cleaning modal inside a Streamlit modal dialog
+if "df_working" in st.session_state:
+    if st.button("Open Missing Values Cleaner"):
+        with st.modal("Fill Missing Values", True):
+            clean_data_modal()
