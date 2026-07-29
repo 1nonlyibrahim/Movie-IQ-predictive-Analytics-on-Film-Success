@@ -159,7 +159,7 @@ st.markdown(f"""
 <style>
 .block-container{{padding-top:2rem;}}
 [data-testid="stFileUploader"]{{
-    width:{"70%" if not st.session_state.uploaded else "35%"};
+    width:{"70%" if not st.session_state.uploaded else "45%"};
     margin:auto;
     transition:all .4s ease;
 }}
@@ -167,7 +167,7 @@ st.markdown(f"""
 [data-testid="stFileUploader"] section{{
     border:2px dashed #4F8BF9;
     border-radius:18px;
-    padding:{"60px" if not st.session_state.uploaded else "15px"};
+    padding:{"60px" if not st.session_state.uploaded else "18px"};
     background:#181818;
     transition:.3s;
 }}
@@ -214,23 +214,19 @@ if not st.session_state.uploaded:
             loader.empty()
             progress.empty()
 
-            st.toast("🎉 Dataset Uploaded Successfully!",icon="✅")
-            st.success("Dataset uploaded successfully. Preparing analysis dashboard...")
-
 
         except Exception as e:
             loader.error(f"Unable to read CSV.\n{e}")
 
-        msg = st.empty()
+        success = st.empty()
 
-        msg.success("✅ Dataset Uploaded Successfully!")
+        success.success("✅ Dataset Uploaded Successfully! Preparing analysis dashboard...")
 
-        time.sleep(3)
+        time.sleep(2)
 
-        msg.empty()
-
-        st.rerun()
-
+        success.empty()
+        st.session_state.uploaded=True
+        st.session_state.df=df
 #==========================================================================================================================================================================================
 #upload the dataset
 #==========================================================================================================================================================================================
