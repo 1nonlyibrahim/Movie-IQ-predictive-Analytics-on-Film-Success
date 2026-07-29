@@ -1035,4 +1035,4 @@ def build_sidebar(df: pd.DataFrame, original: pd.DataFrame, file_name: str):
                 miss_str = st.session_state.get('missing_strategy', 'Fill Numeric with Median')
                 work, miss_rep = apply_missing_strategy(work, miss_str)
                 # Duplicates
-                dup_str = st.session_state.get('duplicate_strategy', '
+                dup_str = st.session_state.get('duplicate_strategy', 'default_value')
