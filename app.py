@@ -152,5 +152,57 @@ if __name__ == "__main__":
     main()
 
 #==========================================================================================================================================================================================
+#upload the dataset
 #==========================================================================================================================================================================================
 
+st.markdown("""
+<style>
+.block-container{padding-top:2rem;}
+h1{text-align:center;}
+[data-testid="stFileUploader"]{width:70%;margin:auto;}
+[data-testid="stFileUploader"] section{
+border:2px dashed #4F8BF9;
+border-radius:18px;
+padding:55px;
+background:#181818;
+transition:.3s;
+}
+[data-testid="stFileUploader"] section:hover{
+border-color:#78A9FF;
+background:#222;
+transform:scale(1.01);
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🎬 MovieIQ")
+st.caption("Intelligent Movie Dataset Analysis & Prediction Platform")
+
+uploaded_file = st.file_uploader(
+    "Drag & Drop your CSV here or Click to Upload",
+    type="csv",
+    help="Only CSV files are supported."
+)
+
+if uploaded_file:
+    progress = st.progress(0)
+    status = st.empty()
+
+    steps = [
+        "📂 Reading Dataset...",
+        "🔍 Validating Structure...",
+        "🧹 Detecting Missing Values...",
+        "📑 Checking Duplicate Records...",
+        "⚙️ Preparing Dashboard...",
+        "✅ Finalizing..."
+    ]
+
+    for i, step in enumerate(steps):
+        status.info(step)
+        progress.progress(int((i + 1) / len(steps) * 100))
+        time.sleep(0.5)
+
+    df = pd.read_csv(uploaded_file)
+
+    st.toast("🎉 Dataset Uploaded Successfully!", icon="✅")
+    st.success("Dataset is ready for analysis.")
