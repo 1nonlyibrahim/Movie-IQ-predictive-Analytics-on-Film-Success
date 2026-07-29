@@ -262,10 +262,18 @@ if st.session_state.uploaded:
 
             time.sleep(0.8)
 
+            # Safely fetch the dataframe from session state to avoid
+            # any local variable shadowing / UnboundLocalError.
+            df_local = st.session_state.get("df")
+
+            if df_local is None:
+                st.error("No dataset found in session. Please upload a CSV first.")
+                st.stop()
+
             missing_columns = [
                 col
                 for col in REQUIRED_COLUMNS
-                if col not in df.columns
+                if col not in df_local.columns
             ]
 
             progress.progress(33)
@@ -299,7 +307,7 @@ if st.session_state.uploaded:
 
             time.sleep(0.8)
 
-            missing_count = int(df.isnull().sum().sum())
+            missing_count = int(df_local.isnull().sum().sum())
 
             if missing_count == 0:
 
@@ -317,13 +325,13 @@ if st.session_state.uploaded:
 
                 time.sleep(0.8)
 
-                original_rows = len(df)
+                original_rows = len(df_local)
 
-                df = df.dropna().reset_index(drop=True)
+                df_local = df_local.dropna().reset_index(drop=True)
 
-                removed_rows = original_rows - len(df)
+                removed_rows = original_rows - len(df_local)
 
-                st.session_state.df = df
+                st.session_state.df = df_local
 
                 progress.progress(66)
 
