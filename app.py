@@ -220,16 +220,16 @@ if uploaded_file and not st.session_state.uploaded:
 
         except Exception as e:
             loader.error(f"Unable to read CSV.\n{e}")
-else:
-    msg = st.empty()
 
-    msg.success("✅ Dataset Uploaded Successfully!")
+        msg = st.empty()
 
-    time.sleep(3)
+        msg.success("✅ Dataset Uploaded Successfully!")
 
-    msg.empty()
+        time.sleep(3)
 
-    st.rerun()
+        msg.empty()
+
+        st.rerun()
 
 #==========================================================================================================================================================================================
 #upload the dataset
