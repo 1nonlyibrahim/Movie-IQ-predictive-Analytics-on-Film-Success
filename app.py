@@ -254,7 +254,7 @@ if st.session_state.uploaded:
 
     st.divider()
 
-    if st.session_state.validation_started:
+    if not st.session_state.validation_started:
 
         @st.dialog("🔍 Dataset Validation", width="large")
         def validation_window():
@@ -264,7 +264,7 @@ if st.session_state.uploaded:
             with col2:
                 if st.button(
                     "🚀 Start Data Validation",
-                    type="primary"
+                    type="primary",
                 ):
                     st.session_state.validation_started = True
 
