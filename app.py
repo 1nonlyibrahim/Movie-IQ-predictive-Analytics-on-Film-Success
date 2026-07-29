@@ -522,7 +522,8 @@ if st.session_state.validation_complete:
     st.sidebar.metric(
         "Outlier Count",
         int(outliers)
-    )
+        help="Outliers are unusually high or low values detected using the IQR (Interquartile Range) method. They are reported for analysis but are not removed automatically."
+)
 
     st.sidebar.metric(
         "Target Variable",
