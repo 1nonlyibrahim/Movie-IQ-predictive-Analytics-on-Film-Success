@@ -256,70 +256,65 @@ if st.session_state.uploaded:
 
     if not st.session_state.validation_started:
 
-        @st.dialog("🔍 Dataset Validation", width="large")
-        def validation_window():
+        col1, col2, col3 = st.columns([1,2,1])
 
-            col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            if st.button("🚀 Start Data Validation", type="primary"):
+                st.session_state.validation_started = True
+            @st.dialog("🔍 Dataset Validation", width="large")
+            def validation_window():
+                progress = st.progress(0)
+                status = st.empty()
 
-            with col2:
-                if st.button(
-                    "🚀 Start Data Validation",
-                    type="primary",
-                ):
-                    st.session_state.validation_started = True
+                status.info("🔍 Step 1 / 3 : Checking Required Columns...")
 
-        validation_window()
+                progress.progress(15)
 
-        progress = st.progress(0)
-        status = st.empty()
+                time.sleep(0.8)
 
-        status.info("🔍 Step 1 / 3 : Checking Required Columns...")
+                missing_columns = [
+                    col
+                    for col in REQUIRED_COLUMNS
+                    if col not in df.columns
+                ]
 
-        progress.progress(15)
+                progress.progress(33)
 
-        time.sleep(0.8)
+                if missing_columns:
 
-        missing_columns = [
-            col
-            for col in REQUIRED_COLUMNS
-            if col not in df.columns
-        ]
+                    status.error("❌ Required Columns Missing")
 
-        progress.progress(33)
+                    st.error(
+                        "The uploaded dataset cannot be analyzed because required columns are missing."
+                    )
 
-        if missing_columns:
+                    st.dataframe(
+                        pd.DataFrame(
+                            {"Missing Columns": missing_columns}
+                        ),
+                        use_container_width=True
+                    )
 
-            status.error("❌ Required Columns Missing")
+                    st.stop()
 
-            st.error(
-                "The uploaded dataset cannot be analyzed because required columns are missing."
-            )
+                progress.progress(100)
 
-            st.dataframe(
-                pd.DataFrame(
-                    {"Missing Columns": missing_columns}
-                ),
-                use_container_width=True
-            )
+                status.success("✅ Required Columns Verified")
 
-            st.stop()
+                time.sleep(1)
 
-        progress.progress(100)
+                progress.empty()
+                status.empty()
 
-        status.success("✅ Required Columns Verified")
+                st.success("Step 1 Completed")
 
-        time.sleep(1)
+                st.session_state.validation_complete = True
 
-        progress.empty()
-        status.empty()
-
-        st.success("Step 1 Completed")
-
-        st.session_state.validation_complete = True
-
-        st.info(
-            "Next Step → Missing Value Detection"
-        )
+                st.info(
+                    "Next Step → Missing Value Detection"
+                )
+                if st.session_state.validation_started:
+                    validation_window()
 #==========================================================================================================================================================================================
 #check for any missing values in the dataset
 #==========================================================================================================================================================================================
