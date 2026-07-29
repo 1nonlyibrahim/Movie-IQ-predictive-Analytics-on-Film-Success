@@ -137,11 +137,15 @@ def create_target(df):
     return df
 def main():
 
-    st.title("🎬 MovieIQ")
+    st.markdown(
+    "<h1 style='text-align: center;'>🎬 MOVIEIQ - INTELLIGENT MOVIE DATASET ANALYSIS & PREDICTION</h1>", 
+    unsafe_allow_html=True
+)
 
-    st.caption(
-        "Intelligent Movie Dataset Analysis & Prediction Platform"
-    )
+    st.markdown(
+    "<p style='text-align: center; color: gray; font-size: 0.85em;'>Intelligent Movie Dataset Analysis & Prediction Platform</p>", 
+    unsafe_allow_html=True
+)
 
 
 if __name__ == "__main__":
@@ -149,5 +153,4 @@ if __name__ == "__main__":
 
 #==========================================================================================================================================================================================
 #==========================================================================================================================================================================================
-st.title("🎬 MOVIEIQ - INTELLIGENT MOVIE DATASET ANALYSIS & PREDICTION ")
-st.caption("Intelligent Movie Dataset Analysis & Prediction Platform")
+
