@@ -341,21 +341,62 @@ if st.session_state.uploaded:
 
                 time.sleep(1)
 
-            progress.progress(100)
-            status.success("✅ Missing Value Validation Completed")
+            # -------------------- STEP 3 : DUPLICATE VALUE CHECK --------------------
 
-            time.sleep(1)
+            status.info("📑 Step 3 / 3 : Checking Duplicate Values...")
+
+            progress.progress(75)
+
+            time.sleep(0.8)
+
+            duplicate_count = int(df_local.duplicated().sum())
+
+            if duplicate_count == 0:
+
+                progress.progress(100)
+
+                status.success("✅ No Duplicate Rows Found")
+
+                time.sleep(1)
+
+            else:
+
+                status.warning(
+                    f"⚠ {duplicate_count} duplicate row(s) detected."
+                )
+
+                time.sleep(0.8)
+
+                original_rows = len(df_local)
+
+                df_local = df_local.drop_duplicates().reset_index(drop=True)
+
+                removed_rows = original_rows - len(df_local)
+
+                st.session_state.df = df_local
+
+                progress.progress(100)
+
+                status.success(
+                    f"✅ Removed {removed_rows} duplicate row(s)."
+                )
+
+                time.sleep(1)
+
+            # -------------------- VALIDATION COMPLETE --------------------
+
+            st.session_state.df = df_local
 
             progress.empty()
             status.empty()
 
-            st.success("Step 2 Completed")
+            st.success("🎉 Dataset Validation Completed Successfully!")
 
             st.session_state.validation_complete = True
 
-            st.info(
-                "Next Step → Duplicate Value Detection"
-            )
+            time.sleep(1)
+
+            st.rerun()
         
         # Centered button to open the validation dialog
         col1, col2, col3 = st.columns([1, 1, 1])
