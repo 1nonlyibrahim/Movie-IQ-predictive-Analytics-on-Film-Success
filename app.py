@@ -182,10 +182,10 @@ st.markdown(f"""
 if not st.session_state.uploaded:
 
     uploaded_file = st.file_uploader(
-        "Drag & Drop your CSV here or Click to Upload",
-        type=["csv"],
-        help="Only CSV files are supported."
-    )
+    "Drag & Drop your CSV here or Click to Upload",
+    type=["csv"],
+    help="Only CSV files are supported."
+)
 
 if uploaded_file and not st.session_state.uploaded:
 
