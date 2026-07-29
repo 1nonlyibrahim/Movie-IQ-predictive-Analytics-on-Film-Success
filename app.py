@@ -575,3 +575,101 @@ if st.session_state.validation_complete:
         st.write(
             f"**Success Column :** {'Yes' if 'success' in df.columns else 'No'}"
         )
+#==========================================================================================================================================================================================
+#KPI cards
+#==========================================================================================================================================================================================
+st.markdown("## 📊 Executive Overview")
+st.caption("A high-level summary of the uploaded movie dataset.")
+
+# ---------- Calculate KPIs ----------
+
+total_movies = len(df)
+
+total_revenue = df["revenue"].sum()
+
+total_budget = df["budget"].sum()
+
+avg_rating = df["vote_average"].mean()
+
+avg_popularity = df["popularity"].mean()
+
+avg_runtime = df["runtime"].mean()
+
+if "success" in df.columns:
+    success_rate = df["success"].mean() * 100
+else:
+    success_rate = ((df["revenue"] > df["budget"]).mean()) * 100
+
+# Handle multiple genres separated by |
+genre_series = (
+    df["genres"]
+    .fillna("Unknown")
+    .astype(str)
+    .str.split("|")
+    .explode()
+    .str.strip()
+)
+
+most_common_genre = (
+    genre_series.mode().iloc[0]
+    if not genre_series.mode().empty
+    else "N/A"
+)
+
+# ---------- KPI Row 1 ----------
+
+c1, c2, c3, c4 = st.columns(4)
+
+with c1:
+    st.metric(
+        "🎬 Total Movies",
+        f"{total_movies:,}"
+    )
+
+with c2:
+    st.metric(
+        "💰 Total Revenue",
+        f"${total_revenue:,.0f}"
+    )
+
+with c3:
+    st.metric(
+        "💸 Total Budget",
+        f"${total_budget:,.0f}"
+    )
+
+with c4:
+    st.metric(
+        "⭐ Average Rating",
+        f"{avg_rating:.2f}/10"
+    )
+
+# ---------- KPI Row 2 ----------
+
+c5, c6, c7, c8 = st.columns(4)
+
+with c5:
+    st.metric(
+        "📈 Avg Popularity",
+        f"{avg_popularity:.2f}"
+    )
+
+with c6:
+    st.metric(
+        "⏱ Avg Runtime",
+        f"{avg_runtime:.1f} min"
+    )
+
+with c7:
+    st.metric(
+        "✅ Success Rate",
+        f"{success_rate:.1f}%"
+    )
+
+with c8:
+    st.metric(
+        "🎭 Most Common Genre",
+        most_common_genre
+    )
+
+st.divider()
