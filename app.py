@@ -1,27 +1,35 @@
+import time
 import streamlit as st
 import pandas as pd
-import time
+import os
 import base64
 
-def get_base64_image(image_path):
-    """Encodes a local image to base64 string."""
-    with open(image_path, "rb") as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+def get_base64_image():
+    """Locates 'bg' image in the local script directory with common extensions."""
+    # List of extensions to check automatically
+    extensions = [".jpg", ".png", ".jpeg", ".JPG", ".PNG"]
+
+    for ext in extensions:
+        filename = f"bg{ext}"
+        if os.path.exists(filename):
+            with open(filename, "rb") as f:
+                data = f.read()
+            # Return both the base64 data and the extension type for the CSS
+            return base64.b64encode(data).decode(), ext.replace(".", "")
+
+    return None, None
 
 
-# Your updated absolute path to the desktop
-image_path = r"C:\Users\admin\Desktop\image.jpg"
+# Attempt to automatically find and load the background image locally
+img_base64, img_type = get_base64_image()
 
-try:
-    img_base64 = get_base64_image(image_path)
-
-    # Inject CSS to set your background image
+if img_base64:
+    # Inject CSS to set your background image seamlessly
     st.markdown(
         f"""
         <style>
         .stAppViewContainer {{
-            background-image: url("data:image/jpg;base64,{img_base64}");
+            background-image: url("data:image/{img_type};base64,{img_base64}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -30,7 +38,7 @@ try:
         .stHeader {{
             background: transparent !important;
         }}
-        /* Ensures global readability over the deep blue background */
+        /* Global text formatting to ensure perfect contrast against the background */
         h1, h2, h3, p, span, label, li {{
             color: #ffffff !important;
         }}
@@ -38,9 +46,11 @@ try:
         """,
         unsafe_allow_html=True,
     )
-except FileNotFoundError:
+else:
+    # Diagnostic helper to guide you if it's placed incorrectly
+    current_folder = os.getcwd()
     st.error(
-        f"Could not find the image at: {image_path}. Please double-check if Windows is hiding the real extension (like image.jpg.png)."
+        f"❌ Background asset missing! Please place your image file inside this exact folder: **{current_folder}** and rename the file to **bg**."
     )
 
 #===========================================================================================================================================================================================
