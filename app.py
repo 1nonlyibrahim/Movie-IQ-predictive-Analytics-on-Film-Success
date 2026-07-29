@@ -1006,6 +1006,8 @@ def build_sidebar(df: pd.DataFrame, original: pd.DataFrame, file_name: str):
                                     st.success("Invalid rows updated.")
                                 except Exception:
                                     st.warning("Could not apply invalid edits.")
+                        except Exception:
+                            st.warning("Could not process invalid rows for editing.")
                     st.session_state['invalid_strategy'] = invalid_strategy
                 else:
                     st.success("No invalid values detected.")
@@ -1027,7 +1029,7 @@ def build_sidebar(df: pd.DataFrame, original: pd.DataFrame, file_name: str):
             except Exception:
                 st.warning("Data cleaning controls could not be fully rendered.")
 
-            # Apply cleaning pipeline
+                # Apply cleaning pipeline
             try:
                 # Ensure numerics
                 work = ensure_numeric_columns(original.copy(), NUMERIC_COLUMNS)
@@ -1036,3 +1038,5 @@ def build_sidebar(df: pd.DataFrame, original: pd.DataFrame, file_name: str):
                 work, miss_rep = apply_missing_strategy(work, miss_str)
                 # Duplicates
                 dup_str = st.session_state.get('duplicate_strategy', 'default_value')
+            except Exception:
+                st.warning("Could not apply cleaning pipeline.")
