@@ -198,10 +198,10 @@ if uploaded_file and not st.session_state.uploaded:
         "🚀 Almost Ready..."
     ]
 
-        for i,s in enumerate(steps):
-            loader.info(s)
-            progress.progress(int((i+1)/len(steps)*100))
-            time.sleep(0.6)
+    for i,s in enumerate(steps):
+        loader.info(s)
+        progress.progress(int((i+1)/len(steps)*100))
+        time.sleep(0.6)
 
         try:
             df=pd.read_csv(uploaded_file)
