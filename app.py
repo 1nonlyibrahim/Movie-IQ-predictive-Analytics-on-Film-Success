@@ -1,2 +1,148 @@
-{"response": "import streamlit as st\nimport pandas as pd\nimport numpy as np\nimport plotly.express as px\nimport plotly.graph_objects as go\nfrom scipy import stats\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report\nimport time\nimport base64\n\n# --- PAGE CONFIGURATION ---\nst.set_page_config(page_title=\"MovieIQ | Intelligence Platform\", page_icon=\"\u2312\", layout=\"wide\", initial_sidebar_state=\"expanded\")\n\n# --- PROFESSIONAL THEME / CSS ---\nst.markdown(\"\"\"\n    <style>\n    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');\n    html, body, [class*=\\\"css\\\"] { font-family: 'Inter', sans-serif; color: #E0E0E0; }\n    .stApp { background-color: #0E1117; }\n    .stMetric { background-color: #1A1C24; padding: 20px; border-radius: 12px; border: 1px solid #30363D; }\n    .card { background-color: #1A1C24; padding: 25px; border-radius: 15px; border: 1px solid #30363D; margin-bottom: 20px; }\n    h1, h2, h3 { color: #FFFFFF; font-weight: 700; }\n    .status-box { background: #21262D; padding: 15px; border-radius: 10px; border-left: 5px solid #238636; }\n    .stButton>button { border-radius: 8px; font-weight: 600; transition: all 0.3s; }\n    .stButton>button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }\n    [data-testid=\\\"stSidebar\\\"] { background-color: #0D1117; border-right: 1px solid #30363D; }\n    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #1F6FEB, #58A6FF); }\n    </style>\n\"\"\", unsafe_allow_html=True)\n\n# --- SESSION STATE INITIALIZATION ---\nif 'data' not in st.session_state:\n    st.session_state.data = None\nif 'processed' not in st.session_state:\n    st.session_state.processed = False\n\n# --- HELPER FUNCTIONS ---\ndef load_data(file):\n    try:\n        df = pd.read_csv(file)\n        return df\n    except Exception as e:\n        st.error(f\"Error reading file: {e}\")\n        return None\n\ndef generate_csv_download_link(df):\n    csv = df.to_csv(index=False)\n    b64 = base64.b64encode(csv.encode()).decode()\n    return f'<a href=\"data:file/csv;base64,{b64}\" download=\"movieiq_cleaned_data.csv\">Download Cleaned Dataset</a>'\n\n# --- MAIN SCREEN (UPLOAD) ---\nif st.session_state.data is None:\n    st.markdown(\"<h1 style='text-align: center; font-size: 3.5rem; margin-top: 50px;'>MovieIQ</h1>\", unsafe_allow_html=True)\n    st.markdown(\"<p style='text-align: center; font-size: 1.2rem; color: #8B949E;'>Intelligent Movie Dataset Analysis & Prediction Platform</p>\", unsafe_allow_html=True)\n    \n    col1, col2, col3 = st.columns([1, 2, 1])\n    with col2:\n        uploaded_file = st.file_uploader(\"Drag and Drop CSV\", type=[\"csv\"])\n        \n        if uploaded_file:\n            progress_text = st.empty()\n            progress_bar = st.progress(0)\n            steps = [\"Loading Dataset...\", \"Reading CSV...\", \"Checking Columns...\", \"Detecting Missing Values...\", \n                     \"Removing Invalid Records...\", \"Creating Target Variable...\", \"Preparing Dashboard...\", \"Finalizing Analysis...\"]\n            \n            df = load_data(uploaded_file)\n            if df is not None:\n                # Validation\n                required = ['budget', 'revenue', 'genres', 'runtime', 'popularity', 'vote_average', 'title']\n                missing_cols = [c for c in required if c not in df.columns]\n                \n                if missing_cols:\n                    st.error(f\"Dataset Invalid. Missing required columns: {', '.join(missing_cols)}\")\n                else:\n                    for i, step in enumerate(steps):\n                        progress_text.text(step)\n                        progress_bar.progress((i + 1) / len(steps))\n                        time.sleep(0.3)\n                    \n                    # Initial Automated Cleaning\n                    df = df.dropna(subset=required)\n                    df['success'] = (df['revenue'] > df['budget']).astype(int)\n                    st.session_state.data = df\n                    st.session_state.processed = True\n                    st.success(\"Dataset Uploaded Successfully. Dataset is Ready for Analysis.\")\n                    time.sleep(1)\n                    st.rerun()\n\n# --- DASHBOARD PAGE ---\nif st.session_state.data is not None:\n    df = st.session_state.data\n    \n    # --- SIDEBAR ---\n    with st.sidebar:\n        st.markdown(\"<h1>MovieIQ</h1>\", unsafe_allow_html=True)\n        st.markdown(\"--- \")\n        st.markdown(\"### \u2705 Dataset Status\")\n        st.write(\"**Status:** Uploaded Successfully\")\n        st.write(f\"**Rows:** {df.shape[0]}\")\n        st.write(f\"**Columns:** {df.shape[1]}\")\n        st.write(f\"**Missing Values:** {df.isna().sum().sum()}\")\n        \n        with st.expander(\"Preview Dataset\"):\n            st.dataframe(df.head(), use_container_width=True)\n\n        st.markdown(\"--- \")\n        st.markdown(\"### \u2312 Data Cleaning Report\")\n        st.info(\"Invalid records removed (<=0 budget/revenue). Success column engineered.\")\n        \n        st.markdown(\"### \u2611 Filters\")\n        genres = sorted(list(set([g for sublist in df['genres'].fillna('').str.split(', ') for g in sublist if g])))\n        selected_genres = st.multiselect(\"Filter by Genre\", options=genres, default=genres[:3] if len(genres)>3 else genres)\n        rating_range = st.slider(\"Vote Average\", 0.0, 10.0, (0.0, 10.0))\n        \n        # Apply Filters\n        filtered_df = df[df['vote_average'].between(rating_range[0], rating_range[1])]\n        # Simplified genre filtering for logic\n        if selected_genres:\n            filtered_df = filtered_df[filtered_df['genres'].apply(lambda x: any(g in str(x) for g in selected_genres))]\n\n    # --- MAIN CONTENT ---\n    st.markdown(\"## Performance Intelligence Dashboard\")\n    \n    # SECTION 1: KPI CARDS\n    m1, m2, m3, m4, m5 = st.columns(5)\n    m1.metric(\"Total Movies\", f\"{len(filtered_df)}\")\n    m2.metric(\"Avg Budget\", f\"${filtered_df['budget'].mean():,.0f}\")\n    m3.metric(\"Avg Revenue\", f\"${filtered_df['revenue'].mean():,.0f}\")\n    m4.metric(\"Avg Rating\", f\"{filtered_df['vote_average'].mean():.1f}/10\")\n    success_rate = (filtered_df['success'].mean() * 100)\n    m5.metric(\"Success Rate\", f\"{success_rate:.1f}%\")\n\n    # SECTION 2: DISTRIBUTION ANALYSIS\n    st.markdown(\"### Distribution Analysis\")\n    c1, c2 = st.columns(2)\n    with c1:\n        fig_rev = px.histogram(filtered_df, x=\"revenue\", nbins=50, title=\"Revenue Distribution\", template=\"plotly_dark\", color_discrete_sequence=['#1F6FEB'])\n        st.plotly_chart(fig_rev, use_container_width=True)\n        st.caption(\"Business Insight: Revenue follows a long-tail distribution; high-grossing blockbusters are statistical outliers.\")\n\n    with c2:\n        fig_pop = px.box(filtered_df, y=\"popularity\", title=\"Popularity Variance\", template=\"plotly_dark\", color_discrete_sequence=['#238636'])\n        st.plotly_chart(fig_pop, use_container_width=True)\n        st.caption(\"Business Insight: Popularity scores show significant variance, indicating niche vs. mainstream appeal.\")\n\n    # SECTION 3: RELATIONSHIPS\n    st.markdown(\"### Relationship Analysis\")\n    fig_scatter = px.scatter(filtered_df, x=\"budget\", y=\"revenue\", color=\"success\", size=\"popularity\", \n                             hover_name=\"title\", title=\"Budget vs Revenue (Scaled by Popularity)\", \n                             template=\"plotly_dark\", color_continuous_scale=\"Viridis\")\n    st.plotly_chart(fig_scatter, use_container_width=True)\n\n    # SECTION 4: GENRE ANALYSIS\n    st.markdown(\"### Genre Strategic Analysis\")\n    # Simple Genre mapping\n    genre_counts = {} # Simplified logic for speed\n    for g in selected_genres: genre_counts[g] = filtered_df[filtered_df['genres'].str.contains(g, na=False)]['revenue'].mean()\n    \n    fig_genre = px.bar(x=list(genre_counts.keys()), y=list(genre_counts.values()), \n                       labels={'x': 'Genre', 'y': 'Avg Revenue'}, title=\"Average Revenue per Selected Genre\",\n                       template=\"plotly_dark\", color_discrete_sequence=['#58A6FF'])\n    st.plotly_chart(fig_genre, use_container_width=True)\n\n    # SECTION 5: STATISTICAL TESTS\n    st.markdown(\"### Statistical Evidence\")\n    group_success = df[df['success'] == 1]['budget']\n    group_fail = df[df['success'] == 0]['budget']\n    t_stat, p_val = stats.ttest_ind(group_success, group_fail)\n    \n    st.markdown(f\"\"\"\n    <div class='card'>\n    <h4>Hypothesis Test: Does higher budget guarantee success?</h4>\n    <p><b>Test:</b> Independent T-Test (Budget Success vs Failure)</p>\n    <p><b>P-Value:</b> {p_val:.4e}</p>\n    <p><b>Decision:</b> {'Significant' if p_val < 0.05 else 'Not Significant'}</p>\n    <p><b>Interpretation:</b> Higher budgets show a statistically significant relationship with profitability.</p>\n    </div>\n    \"\"\", unsafe_allow_html=True)\n\n    # SECTION 6: MACHINE LEARNING\n    st.markdown(\"### Predictive Intelligence (ML)\")\n    features = ['budget', 'runtime', 'popularity', 'vote_average']\n    X = df[features].fillna(0)\n    y = df['success']\n    \n    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n    model = RandomForestClassifier(n_estimators=100, random_state=42)\n    model.fit(X_train, y_train)\n    preds = model.predict(X_test)\n    acc = accuracy_score(y_test, preds)\n\n    col_ml1, col_ml2 = st.columns([1, 2])\n    with col_ml1:\n        st.metric(\"Model Accuracy\", f\"{acc:.2%}\")\n        st.write(\"**Random Forest Classifier**\")\n        st.write(classification_report(y_test, preds, output_dict=True))\n    \n    with col_ml2:\n        feat_imp = pd.DataFrame({'feat': features, 'imp': model.feature_importances_}).sort_values('imp', ascending=False)\n        fig_imp = px.bar(feat_imp, x='imp', y='feat', orientation='h', title=\"Feature Importance\", template=\"plotly_dark\")\n        st.plotly_chart(fig_imp, use_container_width=True)\n\n    # SECTION 7: USER PREDICTION\n    st.markdown(\"### Success Predictor\")\n    with st.expander(\"Run Custom Prediction\"):\n        p_budget = st.number_input(\"Projected Budget\", value=10000000)\n        p_runtime = st.number_input(\"Runtime (mins)\", value=120)\n        p_pop = st.number_input(\"Expected Popularity Score\", value=50)\n        p_vote = st.slider(\"Target Rating\", 0.0, 10.0, 7.0)\n        \n        if st.button(\"Predict Success\"):\n            pred_input = [[p_budget, p_runtime, p_pop, p_vote]]\n            prob = model.predict_proba(pred_input)[0][1]\n            st.markdown(f\"### Prediction: {'PROFITABLE' if prob > 0.5 else 'NON-PROFITABLE'}\")\n            st.write(f\"Confidence Score: {prob:.2%}\")\n\n    # SECTION 8: BUSINESS RECOMMENDATIONS\n    st.markdown(\"### Strategic Recommendations\")\n    recs = [\n        \"1. Focus on high-popularity genres to maximize ROI footprint.\",\n        \"2. Maintain budgets within the 2nd quartile for optimal risk mitigation.\",\n        \"3. Runtimes between 90-120 minutes show the highest correlation with positive ratings.\",\n        \"4. Marketing spend should prioritize increasing the 'popularity' metric before release.\",\n        \"5. Target a minimum 'vote_average' of 6.5 to ensure long-term secondary revenue.\",\n        \"6. Utilize international co-productions to spread financial risk for budgets > $50M.\",\n        \"7. Historical data suggests the Sci-Fi and Animation genres have higher success probabilities.\",\n        \"8. Avoid excessive runtimes (>150m) unless backed by strong established IP.\",\n        \"9. Revenue peaks are seasonal; align release windows with historical performance peaks.\",\n        \"10. Leverage high-rating directors to increase the likelihood of organic popularity growth.\"\n    ]\n    for r in recs: st.write(r)\n\n    # SECTION 9: DOWNLOADS\n    st.markdown(\"--- \")\n    st.markdown(generate_csv_download_link(df), unsafe_allow_html=True)\n\"}"
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+
+from scipy import stats
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+    classification_report,
+)
+
+import joblib
+import time
+
+st.set_page_config(
+    page_title="MovieIQ",
+    page_icon="🎬",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "About": "MovieIQ - Intelligent Movie Dataset Analysis & Prediction Platform"
     }
+)
+REQUIRED_COLUMNS = [
+    "title",
+    "budget",
+    "revenue",
+    "genres",
+    "runtime",
+    "popularity",
+    "vote_average"
+]
+
+NUMERIC_COLUMNS = [
+    "budget",
+    "revenue",
+    "runtime",
+    "popularity",
+    "vote_average"
+]
+if "dataset_uploaded" not in st.session_state:
+    st.session_state.dataset_uploaded = False
+
+if "cleaning_done" not in st.session_state:
+    st.session_state.cleaning_done = False
+
+if "analysis_ready" not in st.session_state:
+    st.session_state.analysis_ready = False
+
+if "df" not in st.session_state:
+    st.session_state.df = None
+
+
+def bytes_to_mb(size):
+    return round(size / (1024 * 1024), 2)
+
+
+def memory_usage(df):
+    return bytes_to_mb(df.memory_usage(deep=True).sum())
+def check_required_columns(df):
+
+    missing = [
+        column
+        for column in REQUIRED_COLUMNS
+        if column not in df.columns
+    ]
+
+    return missing
+def count_missing(df):
+    return int(df.isnull().sum().sum())
+def count_duplicates(df):
+    return int(df.duplicated().sum())
+def count_outliers(df):
+
+    total = 0
+
+    for column in NUMERIC_COLUMNS:
+
+        if column in df.columns:
+
+            q1 = df[column].quantile(0.25)
+            q3 = df[column].quantile(0.75)
+
+            iqr = q3 - q1
+
+            lower = q1 - 1.5 * iqr
+            upper = q3 + 1.5 * iqr
+
+            total += (
+                (df[column] < lower) |
+                (df[column] > upper)
+            ).sum()
+
+    return int(total)
+def invalid_values(df):
+
+    invalid = {}
+
+    if "budget" in df.columns:
+        invalid["budget"] = (df["budget"] <= 0).sum()
+
+    if "revenue" in df.columns:
+        invalid["revenue"] = (df["revenue"] <= 0).sum()
+
+    if "runtime" in df.columns:
+        invalid["runtime"] = (df["runtime"] <= 0).sum()
+
+    if "popularity" in df.columns:
+        invalid["popularity"] = (df["popularity"] < 0).sum()
+
+    if "vote_average" in df.columns:
+        invalid["vote_average"] = (
+            (df["vote_average"] < 0) |
+            (df["vote_average"] > 10)
+        ).sum()
+
+    return invalid
+def create_target(df):
+
+    if "success" not in df.columns:
+
+        df["success"] = np.where(
+            df["revenue"] > df["budget"],
+            1,
+            0
+        )
+
+    return df
+def main():
+
+    st.title("🎬 MovieIQ")
+
+    st.caption(
+        "Intelligent Movie Dataset Analysis & Prediction Platform"
+    )
+
+
+if __name__ == "__main__":
+    main()
