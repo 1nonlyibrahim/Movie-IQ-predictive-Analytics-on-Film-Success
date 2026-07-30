@@ -841,7 +841,6 @@ if st.session_state.validation_complete:
             # ==========================================================
 
             st.markdown("## 🎭 Genre Analysis")
-            st.caption("Analyze movie performance across different genres.")
 
             genre_df = df.copy()
 
@@ -997,6 +996,185 @@ if st.session_state.validation_complete:
             xaxis_title="Genre",
             yaxis_title="Success Rate (%)",
             height=500
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ==========================================================
+    #                 💰 FINANCIAL ANALYSIS
+    # ==========================================================
+
+    with st.expander("💰 Financial Analysis", expanded=False):
+
+        st.caption("Analyze the financial performance of movies based on revenue, budget, profit and return on investment.")
+
+        financial_df = df.copy()
+
+        financial_df["Profit"] = financial_df["revenue"] - financial_df["budget"]
+
+        financial_df["ROI (%)"] = np.where(
+            financial_df["budget"] > 0,
+            ((financial_df["revenue"] - financial_df["budget"]) / financial_df["budget"]) * 100,
+            0
+        )
+
+        financial_df["Budget (Cr)"] = financial_df["budget"] / 1e7
+        financial_df["Revenue (Cr)"] = financial_df["revenue"] / 1e7
+        financial_df["Profit (Cr)"] = financial_df["Profit"] / 1e7
+
+        # =====================================================
+        # Top 10 Highest Revenue Movies
+        # =====================================================
+
+        st.subheader("🎬 Top 10 Highest Revenue Movies")
+
+        top_revenue = (
+            financial_df
+            .sort_values("revenue", ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            top_revenue,
+            x="title",
+            y="Revenue (Cr)",
+            color="Revenue (Cr)",
+            color_continuous_scale="Greens",
+            text_auto=".2f"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500,
+            xaxis_title="Movie",
+            yaxis_title="Revenue (₹ Crore)",
+            xaxis_tickangle=-35
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Top 10 Highest Budget Movies
+        # =====================================================
+
+        st.subheader("💸 Top 10 Highest Budget Movies")
+
+        top_budget = (
+            financial_df
+            .sort_values("budget", ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            top_budget,
+            x="title",
+            y="Budget (Cr)",
+            color="Budget (Cr)",
+            color_continuous_scale="Oranges",
+            text_auto=".2f"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500,
+            xaxis_title="Movie",
+            yaxis_title="Budget (₹ Crore)",
+            xaxis_tickangle=-35
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Budget vs Revenue
+        # =====================================================
+
+        st.subheader("📈 Budget vs Revenue")
+
+        fig = px.scatter(
+            financial_df,
+            x="Budget (Cr)",
+            y="Revenue (Cr)",
+            hover_name="title",
+            color="vote_average",
+            size="popularity",
+            color_continuous_scale="Viridis"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=550,
+            xaxis_title="Budget (₹ Crore)",
+            yaxis_title="Revenue (₹ Crore)"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Top 10 Most Profitable Movies
+        # =====================================================
+
+        st.subheader("💵 Top 10 Most Profitable Movies")
+
+        top_profit = (
+            financial_df
+            .sort_values("Profit", ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            top_profit,
+            x="title",
+            y="Profit (Cr)",
+            color="Profit (Cr)",
+            color_continuous_scale="Tealgrn",
+            text_auto=".2f"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500,
+            xaxis_title="Movie",
+            yaxis_title="Profit (₹ Crore)",
+            xaxis_tickangle=-35
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Top 10 ROI Movies
+        # =====================================================
+
+        st.subheader("📊 Top 10 ROI (%) Movies")
+
+        roi_df = (
+            financial_df[financial_df["budget"] > 0]
+            .sort_values("ROI (%)", ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            roi_df,
+            x="title",
+            y="ROI (%)",
+            color="ROI (%)",
+            color_continuous_scale="Plasma",
+            text_auto=".1f"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500,
+            xaxis_title="Movie",
+            yaxis_title="ROI (%)",
+            xaxis_tickangle=-35
         )
 
         st.plotly_chart(fig, use_container_width=True)
