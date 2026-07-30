@@ -242,9 +242,6 @@ REQUIRED_COLUMNS = [
 if "validation_started" not in st.session_state:
     st.session_state.validation_started = False
 
-if "validation_complete" not in st.session_state:
-    st.session_state.validation_complete = False
-
 if st.session_state.uploaded:
 
     df = st.session_state.df
@@ -445,17 +442,31 @@ if st.session_state.uploaded:
 
             st.session_state.validation_complete = True
 
-            time.sleep(2)
+            st.session_state.show_validation_dialog = False
+
+            time.sleep(1.5)
 
             st.rerun()
         
         # Centered button to open the validation dialog
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if not st.session_state.validation_complete:
-                if st.button("Perform Data Validation", type="primary", use_container_width=True):
-                    st.session_state.validation_started = True
-                    validation_window()
+            if (
+                not st.session_state.validation_complete
+                and
+                not st.session_state.show_validation_dialog
+            ):
+
+                if st.button(
+                    "Perform Data Validation",
+                    type="primary",
+                    use_container_width=True
+                ):
+                    st.session_state.show_validation_dialog = True
+                    st.rerun()
+
+if st.session_state.show_validation_dialog:
+    validation_window()
 
 #==================================================================================================================================================================================================================================
 #🎬 Movie Success Predictor
@@ -562,18 +573,20 @@ if st.session_state.validation_complete:
     analysis_section = st.sidebar.radio(
         "Select Analysis",
         [
+            "📊 Executive Overview",
             "📈 Distribution Analysis",
             "🎭 Genre Analysis",
             "💰 Financial Analysis",
             "⭐ Rating & Popularity Analysis",
             "🔗 Correlation Analysis",
             "📊 Statistical Analysis",
-            "🎯 Movie Success Prediction",
             "💡 Business Insights",
             "📝 Business Recommendations",
             "🤖 Machine Learning"
         ]
     )
+    st.sidebar.divider()
+
     st.sidebar.title("📂 Dataset Info")
 
     st.sidebar.divider()
@@ -630,7 +643,6 @@ if st.session_state.validation_complete:
         help="The target variable is the output that the machine learning model predicts. In this application, a movie is labeled as Successful (1) if its revenue is greater than its budget, otherwise it is labeled as Not Successful (0)."
     )
 
-    st.sidebar.divider()
 
     # ---------------- Dataset Preview ---------------- #
 
@@ -686,136 +698,137 @@ if st.session_state.validation_complete:
 
 if st.session_state.validation_complete:
 
-    df = st.session_state.df
-    #==========================================================================================================================================================================================
-    #KPI cards
-    #==========================================================================================================================================================================================
-    def format_currency_indian(num):
-        num = float(num)
-        sign = "-" if num < 0 else ""
-        num = abs(num)
+    if analysis_section == "📊 Executive Overview":
+        df = st.session_state.df
+        #==========================================================================================================================================================================================
+        #KPI cards
+        #==========================================================================================================================================================================================
+        def format_currency_indian(num):
+            num = float(num)
+            sign = "-" if num < 0 else ""
+            num = abs(num)
 
-        if num >= 1e7:  # Crore
-            return f"{sign}₹{num/1e7:,.2f} Cr"
+            if num >= 1e7:  # Crore
+                return f"{sign}₹{num/1e7:,.2f} Cr"
 
-        elif num >= 1e5:  # Lakh
-            return f"{sign}₹{num/1e5:,.2f} L"
+            elif num >= 1e5:  # Lakh
+                return f"{sign}₹{num/1e5:,.2f} L"
 
+            else:
+                # Indian comma format
+                integer, decimal = f"{num:.2f}".split(".")
+
+                if len(integer) > 3:
+                    last3 = integer[-3:]
+                    rest = integer[:-3]
+
+                    parts = []
+                    while len(rest) > 2:
+                        parts.insert(0, rest[-2:])
+                        rest = rest[:-2]
+
+                    if rest:
+                        parts.insert(0, rest)
+
+                    integer = ",".join(parts + [last3])
+
+                return f"{sign}₹{integer}.{decimal}"
+
+        st.markdown("## 📊 Executive Overview")
+
+        # ---------- Calculate KPIs ----------
+
+        total_movies = len(df)
+
+        total_revenue = df["revenue"].sum()
+
+        total_budget = df["budget"].sum()
+
+        avg_rating = df["vote_average"].mean()
+
+        avg_popularity = df["popularity"].mean()
+
+        avg_runtime = df["runtime"].mean()
+
+        if "success" in df.columns:
+            success_rate = df["success"].mean() * 100
         else:
-            # Indian comma format
-            integer, decimal = f"{num:.2f}".split(".")
+            success_rate = ((df["revenue"] > df["budget"]).mean()) * 100
 
-            if len(integer) > 3:
-                last3 = integer[-3:]
-                rest = integer[:-3]
-
-                parts = []
-                while len(rest) > 2:
-                    parts.insert(0, rest[-2:])
-                    rest = rest[:-2]
-
-                if rest:
-                    parts.insert(0, rest)
-
-                integer = ",".join(parts + [last3])
-
-            return f"{sign}₹{integer}.{decimal}"
-
-    st.markdown("## 📊 Executive Overview")
-
-    # ---------- Calculate KPIs ----------
-
-    total_movies = len(df)
-
-    total_revenue = df["revenue"].sum()
-
-    total_budget = df["budget"].sum()
-
-    avg_rating = df["vote_average"].mean()
-
-    avg_popularity = df["popularity"].mean()
-
-    avg_runtime = df["runtime"].mean()
-
-    if "success" in df.columns:
-        success_rate = df["success"].mean() * 100
-    else:
-        success_rate = ((df["revenue"] > df["budget"]).mean()) * 100
-
-    # Handle multiple genres separated by |
-    genre_series = (
-        df["genres"]
-        .fillna("Unknown")
-        .astype(str)
-        .str.split("|")
-        .explode()
-        .str.strip()
-    )
-
-    most_common_genre = (
-        genre_series.mode().iloc[0]
-        if not genre_series.mode().empty
-        else "N/A"
-    )
-
-    # ---------- KPI Row 1 ----------
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        st.metric(
-            "🎬 Total Movies",
-            f"{total_movies:,}"
+        # Handle multiple genres separated by |
+        genre_series = (
+            df["genres"]
+            .fillna("Unknown")
+            .astype(str)
+            .str.split("|")
+            .explode()
+            .str.strip()
         )
 
-    with c2:
-        st.metric(
-            "💰 Total Revenue",
-            format_currency_indian(total_revenue)
+        most_common_genre = (
+            genre_series.mode().iloc[0]
+            if not genre_series.mode().empty
+            else "N/A"
         )
 
-    with c3:
-        st.metric(
-            "💸 Total Budget",
-            format_currency_indian(total_budget)
-        )
+        # ---------- KPI Row 1 ----------
 
-    with c4:
-        st.metric(
-            "⭐ Average Rating",
-            f"{avg_rating:.2f}/10"
-        )
+        c1, c2, c3, c4 = st.columns(4)
 
-    # ---------- KPI Row 2 ----------
+        with c1:
+            st.metric(
+                "🎬 Total Movies",
+                f"{total_movies:,}"
+            )
 
-    c5, c6, c7, c8 = st.columns(4)
+        with c2:
+            st.metric(
+                "💰 Total Revenue",
+                format_currency_indian(total_revenue)
+            )
 
-    with c5:
-        st.metric(
-            "📈 Avg Popularity",
-            f"{avg_popularity:.2f}"
-        )
+        with c3:
+            st.metric(
+                "💸 Total Budget",
+                format_currency_indian(total_budget)
+            )
 
-    with c6:
-        st.metric(
-            "⏱ Avg Runtime",
-            f"{avg_runtime:.1f} min"
-        )
+        with c4:
+            st.metric(
+                "⭐ Average Rating",
+                f"{avg_rating:.2f}/10"
+            )
 
-    with c7:
-        st.metric(
-            "✅ Success Rate",
-            f"{success_rate:.1f}%"
-        )
+        # ---------- KPI Row 2 ----------
 
-    with c8:
-        st.markdown("""<style>[data-testid="stMetricValue"]{ font-size:22px !important;}</style>""", unsafe_allow_html=True)
-        st.metric(
-            "🎭 Most Common Genre",
-            most_common_genre
-        )
+        c5, c6, c7, c8 = st.columns(4)
 
-    st.divider()
+        with c5:
+            st.metric(
+                "📈 Avg Popularity",
+                f"{avg_popularity:.2f}"
+            )
+
+        with c6:
+            st.metric(
+                "⏱ Avg Runtime",
+                f"{avg_runtime:.1f} min"
+            )
+
+        with c7:
+            st.metric(
+                "✅ Success Rate",
+                f"{success_rate:.1f}%"
+            )
+
+        with c8:
+            st.markdown("""<style>[data-testid="stMetricValue"]{ font-size:22px !important;}</style>""", unsafe_allow_html=True)
+            st.metric(
+                "🎭 Most Common Genre",
+                most_common_genre
+            )
+
+        st.divider()
 
     if analysis_section == "📈 Distribution Analysis":
 
@@ -965,10 +978,10 @@ if st.session_state.validation_complete:
             genre_df["genres"] = genre_df["genres"].str.strip()
 
             genre_count = (
-            genre_df["genres"]
-            .value_counts()
-            .reset_index()
-        )
+                genre_df["genres"]
+                .value_counts()
+                .reset_index()
+            )
 
         genre_count.columns = ["Genre", "Movies"]
 
