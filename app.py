@@ -464,15 +464,11 @@ if st.session_state.validation_complete:
 
     df = st.session_state.df
 
-    st.sidebar.title("🎬 MovieIQ")
-
-    st.sidebar.success("Dataset Ready for Analysis")
+    st.sidebar.title("📂 Dataset Info")
 
     st.sidebar.divider()
 
     # ---------------- Dataset Status ---------------- #
-
-    st.sidebar.subheader("📂 Dataset Status")
 
     st.sidebar.metric("Rows", f"{df.shape[0]:,}")
     st.sidebar.metric("Columns", df.shape[1])
