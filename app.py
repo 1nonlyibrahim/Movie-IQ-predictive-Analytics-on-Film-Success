@@ -460,63 +460,103 @@ if st.session_state.uploaded:
 #==================================================================================================================================================================================================================================
 #🎬 Movie Success Predictor
 #==================================================================================================================================================================================================================================
+if st.session_state.validation_complete:
+    @st.dialog("🎬 Movie Success Prediction", width="large")
+    def prediction_window():
+        st.markdown(
+            """
+            <h1 style="text-align:center; font-weight:700;">
+                🎬 Movie Success Predictor
+            </h1>
 
-@st.dialog("🎬 Movie Success Prediction", width="large")
-def prediction_window():
-    budget = st.number_input("Budget", min_value=0.0)
+            <h4 style="text-align:center; color:#A9A9A9; font-weight:400;">
+                Enter your movie details and get an instant success prediction powered by Artificial Intelligence.
+            </h4>
+            """,
+            unsafe_allow_html=True
+        )
 
-    runtime = st.number_input("Runtime", min_value=1)
+        df = st.session_state.df
 
-    popularity = st.number_input("Popularity", min_value=0.0)
+        budget = st.number_input("Budget", min_value=0.0)
+        runtime = st.number_input("Runtime", min_value=1)
+        popularity = st.number_input("Popularity", min_value=0.0, max_value=100.0)
+        vote_average = st.slider("Vote Average", 0.0, 10.0, 7.0)
+        genre = st.selectbox(
+            "Genre",
+            sorted(df["genres"].dropna().unique())
+        )
 
-    vote_average = st.slider("Vote Average", 0.0, 10.0, 7.0)
+        if st.button("🚀 Predict Success"):
+            if "model" not in st.session_state:
+                st.error(
+                    "Please open the Machine Learning section first."
+                )
+                st.stop()
 
-    genre = st.selectbox(
-        "Genre",
-        sorted(df["genres"].dropna().unique())
-    )
+            model = st.session_state.model
 
-    if st.button("🚀 Predict Success"):
-        if "model" not in st.session_state:
-            st.error(
-                "Please open the Machine Learning section first."
+            input_data = pd.DataFrame(
+                [[budget, runtime, popularity]],
+                columns=[
+                    "budget",
+                    "runtime",
+                    "popularity"
+                ]
             )
-            st.stop()
 
-        model = st.session_state.model
+            prediction = model.predict(input_data)[0]
 
-        input_data = pd.DataFrame(
+            probability = model.predict_proba(input_data)[0][1]
+
+            if prediction == 1:
+                st.success("🎉 Movie is predicted to be Successful!")
+            else:
+                st.error("❌ Movie is predicted to be Unsuccessful.")
+
+            st.metric(
+                "Success Probability",
+                f"{probability*100:.2f}%"
+            )
+
             [[budget, runtime, popularity]],
             columns=[
-                "budget",
-                "runtime",
-                "popularity"
-            ]
-        )
+                    "budget",
+                    "runtime",
+                    "popularity"
+                ]
+            
 
-        prediction = model.predict(input_data)[0]
+            prediction = model.predict(input_data)[0]
 
-        probability = model.predict_proba(input_data)[0][1]
+            probability = model.predict_proba(input_data)[0][1]
 
-        if prediction == 1:
-            st.success("🎉 Movie is predicted to be Successful!")
-        else:
-            st.error("❌ Movie is predicted to be Unsuccessful.")
+            if prediction == 1:
+                st.success("🎉 Movie is predicted to be Successful!")
+            else:
+                st.error("❌ Movie is predicted to be Unsuccessful.")
 
-        st.metric(
-            "Success Probability",
-            f"{probability*100:.2f}%"
-        )
+            st.metric(
+                "Success Probability",
+                f"{probability*100:.2f}%"
+            )
 
-col1, col2, col3 = st.columns([1,2,1])
+st.markdown("""<style>.big-button button{height: 70px !important;font-size: 24px !important;font-weight: 700 !important;border-radius: 15px !important;
+}</style>""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1, 3, 1])
 
 with col2:
+    st.markdown('<div class="big-button">', unsafe_allow_html=True)
+
     if st.button(
         "🎬 Movie Success Predictor",
-        type="primary",
-        use_container_width=True
+        use_container_width=True,
+        type="primary"
     ):
         prediction_window()
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
