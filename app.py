@@ -717,7 +717,7 @@ if st.session_state.validation_complete:
             fig = px.histogram(
                 df,
                 x=column,
-                nbins=20,
+                nbins=30,
                 title=f"{column.replace('_',' ').title()} Histogram",
                 color_discrete_sequence=["#4F8BF9"]
             )
@@ -726,7 +726,7 @@ if st.session_state.validation_complete:
                 template="plotly_dark",
                 height=380,
                 margin=dict(l=20, r=20, t=50, b=20),
-                xaxis_title=f"{column.replace('_',' ').title()} (₹ Crores)",
+                xaxis_title=f"{column.replace('_',' ').title()}  (₹ Crores)",
                 yaxis_title="No. of Movies"
             )
 
@@ -762,18 +762,16 @@ if st.session_state.validation_complete:
 
         st.info(
             f"""
-    **Summary**
+**📌 Distribution Summary**
 
-    • Mean : **{df[column].mean():,.2f}**
+• The average **{column.replace('_', ' ').title()}** across all movies is **{df[column].mean():,.2f}**.
 
-    • Median : **{df[column].median():,.2f}**
+• Half of the movies have a **{column.replace('_', ' ').title()}** below **{df[column].median():,.2f}**, while the other half are above it.
 
-    • Minimum : **{df[column].min():,.2f}**
+• The recorded values range from **{df[column].min():,.2f}** to **{df[column].max():,.2f}**.
 
-    • Maximum : **{df[column].max():,.2f}**
-
-    • Standard Deviation : **{df[column].std():,.2f}**
-    """
+• The overall spread of the data is **{df[column].std():,.2f}**, indicating how much the values vary from the average.
+"""
         )
 
         st.divider()
