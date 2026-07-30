@@ -519,34 +519,17 @@ if st.session_state.validation_complete:
                 f"{probability*100:.2f}%"
             )
 
-            [[budget, runtime, popularity]],
-            columns=[
-                    "budget",
-                    "runtime",
-                    "popularity"
-                ]
-            
-
-            probability = model.predict_proba(input_data)[0][1]
-
-            if prediction == 1:
-                st.success("🎉 Movie is predicted to be Successful!")
-            else:
-                st.error("❌ Movie is predicted to be Unsuccessful.")
-
-            st.metric(
-                "Success Probability",
-                f"{probability*100:.2f}%"
-            )
-
-    st.markdown("""<style>.big-button 
-    button{height: 70px !important;font-size: 24px !important;font-weight: 700 !important;border-radius: 15px !important;
-    }</style>""", unsafe_allow_html=True)
-
     col1, col2, col3 = st.columns([1, 3, 1])
 
     with col2:
-        st.markdown('<div class="big-button">', unsafe_allow_html=True)
+        st.markdown("""<style>
+    div.stButton > button {
+        height: 70px !important;
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        border-radius: 15px !important;
+    }
+</style>""", unsafe_allow_html=True)
 
         if st.button(
             "🎬 Movie Success Predictor",
@@ -554,8 +537,6 @@ if st.session_state.validation_complete:
             type="primary"
         ):
             prediction_window()
-
-        st.markdown("</div>", unsafe_allow_html=True)
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
