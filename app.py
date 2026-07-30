@@ -707,292 +707,296 @@ if st.session_state.validation_complete:
 
     st.divider()
 
-    #==========================================================================================================================================================================================
-    #                 DISTRIBUTION ANALYSIS
-    #==========================================================================================================================================================================================
+    with st.expander("📊 Distribution Analysis", expanded=False):
 
-    st.markdown("## 📊 Distribution Analysis")
+        #==========================================================================================================================================================================================
+        #                 DISTRIBUTION ANALYSIS
+        #==========================================================================================================================================================================================
 
-    variables = [
-        ("budget", "💸 Budget Distribution"),
-        ("revenue", "💰 Revenue Distribution"),
-        ("runtime", "⏱ Runtime Distribution"),
-        ("popularity", "📈 Popularity Distribution"),
-        ("vote_average", "⭐ Vote Average Distribution")
-    ]
+        st.markdown("## 📊 Distribution Analysis")
 
-    for column, title in variables:
+        variables = [
+            ("budget", "💸 Budget Distribution"),
+            ("revenue", "💰 Revenue Distribution"),
+            ("runtime", "⏱ Runtime Distribution"),
+            ("popularity", "📈 Popularity Distribution"),
+            ("vote_average", "⭐ Vote Average Distribution")
+        ]
 
-        st.markdown(f"### {title}")
+        for column, title in variables:
 
-        col1, col2 = st.columns(2)
+            st.markdown(f"### {title}")
 
-        # ---------------- Histogram ---------------- #
+            col1, col2 = st.columns(2)
 
-        with col1:
+            # ---------------- Histogram ---------------- #
 
-            plot_df = df.copy()
+            with col1:
+
+                plot_df = df.copy()
+
+                if column in ["budget", "revenue"]:
+                    plot_df[column] = plot_df[column] / 1e7
+                    x_title = f"{column.replace('_', ' ').title()} (₹ Crore)"
+                else:
+                    x_title = column.replace("_", " ").title()
+
+                fig = px.histogram(
+                    plot_df,
+                    x=column,
+                    nbins=30,
+                    title=f"{column.replace('_',' ').title()} Distribution",
+                    color_discrete_sequence=["#4F8BF9"]
+                )
+
+                fig.update_layout(
+                    template="plotly_dark",
+                    height=380,
+                    margin=dict(l=20, r=20, t=50, b=20),
+                    xaxis_title=x_title,
+                    yaxis_title="No. of Movies"
+                )
+
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True
+                )
+
+            # ---------------- Box Plot ---------------- #
+
+            with col2:
+
+                fig = px.box(
+                    plot_df,
+                    y=column,
+                    title=f"{column.replace('_',' ').title()} Box Plot",
+                    color_discrete_sequence=["#FF6B6B"]
+                )
+
+                fig.update_layout(
+                    template="plotly_dark",
+                    height=380,
+                    margin=dict(l=20, r=20, t=50, b=20),
+                    yaxis_title=x_title
+                )
+
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True
+                )
+
+            # ---------------- Quick Summary ---------------- #
 
             if column in ["budget", "revenue"]:
-                plot_df[column] = plot_df[column] / 1e7
-                x_title = f"{column.replace('_', ' ').title()} (₹ Crore)"
-            else:
-                x_title = column.replace("_", " ").title()
+                avg = format_currency_indian(df[column].mean())
+                median = format_currency_indian(df[column].median())
+                minimum = format_currency_indian(df[column].min())
+                maximum = format_currency_indian(df[column].max())
+                std = format_currency_indian(df[column].std())
 
-            fig = px.histogram(
-                plot_df,
-                x=column,
-                nbins=30,
-                title=f"{column.replace('_',' ').title()} Distribution",
-                color_discrete_sequence=["#4F8BF9"]
+            elif column == "runtime":
+                avg = f"{df[column].mean():.1f} min"
+                median = f"{df[column].median():.1f} min"
+                minimum = f"{df[column].min():.1f} min"
+                maximum = f"{df[column].max():.1f} min"
+                std = f"{df[column].std():.1f} min"
+
+            elif column == "vote_average":
+                avg = f"{df[column].mean():.2f}/10"
+                median = f"{df[column].median():.2f}/10"
+                minimum = f"{df[column].min():.2f}/10"
+                maximum = f"{df[column].max():.2f}/10"
+                std = f"{df[column].std():.2f}"
+
+            else:   # popularity and any other numeric columns
+                avg = f"{df[column].mean():,.2f}"
+                median = f"{df[column].median():,.2f}"
+                minimum = f"{df[column].min():,.2f}"
+                maximum = f"{df[column].max():,.2f}"
+                std = f"{df[column].std():,.2f}"
+
+            st.info(    
+                f"""
+        **📌 Distribution Summary**
+
+        • The average **{column.replace('_', ' ').title()}** across all movies is **{avg}**.
+
+        • Half of the movies have a **{column.replace('_', ' ').title()}** below **{median}**, while the other half are above it.
+
+        • The recorded values range from **{minimum}** to **{maximum}**.
+
+        • The overall spread of the data is **{std}**, indicating how much the values vary from the average.
+        """
             )
 
-            fig.update_layout(
-                template="plotly_dark",
-                height=380,
-                margin=dict(l=20, r=20, t=50, b=20),
-                xaxis_title=x_title,
-                yaxis_title="No. of Movies"
+            st.divider()
+
+    with st.expander("🎭 Genre Analysis", expanded=False):
+
+        if st.session_state.get("validation_complete", False):
+
+            df = st.session_state.df
+            # ==========================================================
+            #                    GENRE ANALYSIS
+            # ==========================================================
+
+            st.markdown("## 🎭 Genre Analysis")
+            st.caption("Analyze movie performance across different genres.")
+
+            genre_df = df.copy()
+
+            genre_df["genres"] = genre_df["genres"].fillna("Unknown")
+
+            genre_df = (
+                genre_df
+                .assign(genres=genre_df["genres"].str.split("|"))
+                .explode("genres")
             )
 
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
+            genre_df["genres"] = genre_df["genres"].str.strip()
 
-        # ---------------- Box Plot ---------------- #
-
-        with col2:
-
-            fig = px.box(
-                plot_df,
-                y=column,
-                title=f"{column.replace('_',' ').title()} Box Plot",
-                color_discrete_sequence=["#FF6B6B"]
-            )
-
-            fig.update_layout(
-                template="plotly_dark",
-                height=380,
-                margin=dict(l=20, r=20, t=50, b=20),
-                yaxis_title=x_title
-            )
-
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
-
-        # ---------------- Quick Summary ---------------- #
-
-        if column in ["budget", "revenue"]:
-            avg = format_currency_indian(df[column].mean())
-            median = format_currency_indian(df[column].median())
-            minimum = format_currency_indian(df[column].min())
-            maximum = format_currency_indian(df[column].max())
-            std = format_currency_indian(df[column].std())
-
-        elif column == "runtime":
-            avg = f"{df[column].mean():.1f} min"
-            median = f"{df[column].median():.1f} min"
-            minimum = f"{df[column].min():.1f} min"
-            maximum = f"{df[column].max():.1f} min"
-            std = f"{df[column].std():.1f} min"
-
-        elif column == "vote_average":
-            avg = f"{df[column].mean():.2f}/10"
-            median = f"{df[column].median():.2f}/10"
-            minimum = f"{df[column].min():.2f}/10"
-            maximum = f"{df[column].max():.2f}/10"
-            std = f"{df[column].std():.2f}"
-
-        else:   # popularity and any other numeric columns
-            avg = f"{df[column].mean():,.2f}"
-            median = f"{df[column].median():,.2f}"
-            minimum = f"{df[column].min():,.2f}"
-            maximum = f"{df[column].max():,.2f}"
-            std = f"{df[column].std():,.2f}"
-
-        st.info(
-            f"""
-    **📌 Distribution Summary**
-
-    • The average **{column.replace('_', ' ').title()}** across all movies is **{avg}**.
-
-    • Half of the movies have a **{column.replace('_', ' ').title()}** below **{median}**, while the other half are above it.
-
-    • The recorded values range from **{minimum}** to **{maximum}**.
-
-    • The overall spread of the data is **{std}**, indicating how much the values vary from the average.
-    """
+            genre_count = (
+            genre_df["genres"]
+            .value_counts()
+            .reset_index()
         )
 
-        st.divider()
+        genre_count.columns = ["Genre", "Movies"]
 
-    if st.session_state.get("validation_complete", False):
+        fig = px.bar(
+            genre_count,
+            x="Genre",
+            y="Movies",
+            color="Movies",
+            color_continuous_scale="Blues",
+            text_auto=True,
+            title="Movie Count by Genre"
+        )
 
-        df = st.session_state.df
-        # ==========================================================
-        #                    GENRE ANALYSIS
-        # ==========================================================
+        fig.update_layout(
+            template="plotly_dark",
+            xaxis_title="Genre",
+            yaxis_title="Number of Movies",
+            height=500
+        )
 
-        st.markdown("## 🎭 Genre Analysis")
-        st.caption("Analyze movie performance across different genres.")
+        st.plotly_chart(fig, use_container_width=True)
 
-        genre_df = df.copy()
-
-        genre_df["genres"] = genre_df["genres"].fillna("Unknown")
-
-        genre_df = (
+        genre_revenue = (
             genre_df
-            .assign(genres=genre_df["genres"].str.split("|"))
-            .explode("genres")
+            .groupby("genres")["revenue"]
+            .mean()
+            .sort_values(ascending=False)
+            .reset_index()
         )
 
-        genre_df["genres"] = genre_df["genres"].str.strip()
+        genre_revenue["Revenue (Cr)"] = genre_revenue["revenue"] / 1e7
 
-        genre_count = (
-        genre_df["genres"]
-        .value_counts()
-        .reset_index()
-    )
+        fig = px.bar(
+            genre_revenue,
+            x="genres",
+            y="Revenue (Cr)",
+            color="Revenue (Cr)",
+            color_continuous_scale="Greens",
+            text_auto=".2f",
+            title="Average Revenue by Genre"
+        )
 
-    genre_count.columns = ["Genre", "Movies"]
+        fig.update_layout(
+            template="plotly_dark",
+            xaxis_title="Genre",
+            yaxis_title="Average Revenue (₹ Crore)",
+            height=500
+        )
 
-    fig = px.bar(
-        genre_count,
-        x="Genre",
-        y="Movies",
-        color="Movies",
-        color_continuous_scale="Blues",
-        text_auto=True,
-        title="Movie Count by Genre"
-    )
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig.update_layout(
-        template="plotly_dark",
-        xaxis_title="Genre",
-        yaxis_title="Number of Movies",
-        height=500
-    )
+        genre_rating = (
+            genre_df
+            .groupby("genres")["vote_average"]
+            .mean()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        fig = px.bar(
+            genre_rating,
+            x="genres",
+            y="vote_average",
+            color="vote_average",
+            color_continuous_scale="Purples",
+            text_auto=".2f",
+            title="Average Rating by Genre"
+        )
 
-    genre_revenue = (
-        genre_df
-        .groupby("genres")["revenue"]
-        .mean()
-        .sort_values(ascending=False)
-        .reset_index()
-    )
+        fig.update_layout(
+            template="plotly_dark",
+            xaxis_title="Genre",
+            yaxis_title="Average Rating",
+            height=500
+        )
 
-    genre_revenue["Revenue (Cr)"] = genre_revenue["revenue"] / 1e7
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig = px.bar(
-        genre_revenue,
-        x="genres",
-        y="Revenue (Cr)",
-        color="Revenue (Cr)",
-        color_continuous_scale="Greens",
-        text_auto=".2f",
-        title="Average Revenue by Genre"
-    )
+        genre_budget = (
+            genre_df
+            .groupby("genres")["budget"]
+            .mean()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
 
-    fig.update_layout(
-        template="plotly_dark",
-        xaxis_title="Genre",
-        yaxis_title="Average Revenue (₹ Crore)",
-        height=500
-    )
+        genre_budget["Budget (Cr)"] = genre_budget["budget"] / 1e7
 
-    st.plotly_chart(fig, use_container_width=True)
+        fig = px.bar(
+            genre_budget,
+            x="genres",
+            y="Budget (Cr)",
+            color="Budget (Cr)",
+            color_continuous_scale="Oranges",
+            text_auto=".2f",
+            title="Average Budget by Genre"
+        )
 
-    genre_rating = (
-        genre_df
-        .groupby("genres")["vote_average"]
-        .mean()
-        .sort_values(ascending=False)
-        .reset_index()
-    )
+        fig.update_layout(
+            template="plotly_dark",
+            xaxis_title="Genre",
+            yaxis_title="Average Budget (₹ Crore)",
+            height=500
+        )
 
-    fig = px.bar(
-        genre_rating,
-        x="genres",
-        y="vote_average",
-        color="vote_average",
-        color_continuous_scale="Purples",
-        text_auto=".2f",
-        title="Average Rating by Genre"
-    )
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig.update_layout(
-        template="plotly_dark",
-        xaxis_title="Genre",
-        yaxis_title="Average Rating",
-        height=500
-    )
+        SUCCESS_THRESHOLD = 7.0
 
-    st.plotly_chart(fig, use_container_width=True)
+        genre_df["Successful"] = genre_df["vote_average"] >= SUCCESS_THRESHOLD
 
-    genre_budget = (
-        genre_df
-        .groupby("genres")["budget"]
-        .mean()
-        .sort_values(ascending=False)
-        .reset_index()
-    )
+        success_rate = (
+            genre_df
+            .groupby("genres")["Successful"]
+            .mean()
+            .mul(100)
+            .sort_values(ascending=False)
+            .reset_index()
+        )
 
-    genre_budget["Budget (Cr)"] = genre_budget["budget"] / 1e7
+        success_rate.columns = ["Genre", "Success Rate (%)"]
 
-    fig = px.bar(
-        genre_budget,
-        x="genres",
-        y="Budget (Cr)",
-        color="Budget (Cr)",
-        color_continuous_scale="Oranges",
-        text_auto=".2f",
-        title="Average Budget by Genre"
-    )
+        fig = px.bar(
+            success_rate,
+            x="Genre",
+            y="Success Rate (%)",
+            color="Success Rate (%)",
+            color_continuous_scale="Viridis",
+            text_auto=".1f",
+            title="Success Rate by Genre"
+        )
 
-    fig.update_layout(
-        template="plotly_dark",
-        xaxis_title="Genre",
-        yaxis_title="Average Budget (₹ Crore)",
-        height=500
-    )
+        fig.update_layout(
+            template="plotly_dark",
+            xaxis_title="Genre",
+            yaxis_title="Success Rate (%)",
+            height=500
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
-
-    SUCCESS_THRESHOLD = 7.0
-
-    genre_df["Successful"] = genre_df["vote_average"] >= SUCCESS_THRESHOLD
-
-    success_rate = (
-        genre_df
-        .groupby("genres")["Successful"]
-        .mean()
-        .mul(100)
-        .sort_values(ascending=False)
-        .reset_index()
-    )
-
-    success_rate.columns = ["Genre", "Success Rate (%)"]
-
-    fig = px.bar(
-        success_rate,
-        x="Genre",
-        y="Success Rate (%)",
-        color="Success Rate (%)",
-        color_continuous_scale="Viridis",
-        text_auto=".1f",
-        title="Success Rate by Genre"
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        xaxis_title="Genre",
-        yaxis_title="Success Rate (%)",
-        height=500
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
