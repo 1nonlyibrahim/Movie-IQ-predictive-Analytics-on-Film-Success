@@ -541,22 +541,22 @@ if st.session_state.validation_complete:
                 f"{probability*100:.2f}%"
             )
 
-st.markdown("""<style>.big-button button{height: 70px !important;font-size: 24px !important;font-weight: 700 !important;border-radius: 15px !important;
-}</style>""", unsafe_allow_html=True)
+    st.markdown("""<style>.big-button button{height: 70px !important;font-size: 24px !important;font-weight: 700 !important;border-radius: 15px !important;
+    }</style>""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([1, 3, 1])
+    col1, col2, col3 = st.columns([1, 3, 1])
 
-with col2:
-    st.markdown('<div class="big-button">', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div class="big-button">', unsafe_allow_html=True)
 
-    if st.button(
-        "🎬 Movie Success Predictor",
-        use_container_width=True,
-        type="primary"
-    ):
-        prediction_window()
+        if st.button(
+            "🎬 Movie Success Predictor",
+            use_container_width=True,
+            type="primary"
+        ):
+            prediction_window()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
