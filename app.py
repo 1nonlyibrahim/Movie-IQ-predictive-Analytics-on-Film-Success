@@ -764,13 +764,13 @@ if st.session_state.validation_complete:
             f"""
 **📌 Distribution Summary**
 
-• The average **{column.replace('_', ' ').title()}** across all movies is **{df[column].mean():,.2f}**.
+• The average **{column.replace('_', ' ').title()}** across all movies is **{format_currency_indian(df[column].mean()):,.2f }**.
 
-• Half of the movies have a **{column.replace('_', ' ').title()}** below **{df[column].median():,.2f}**, while the other half are above it.
+• Half of the movies have a **{column.replace('_', ' ').title()}** below **{format_currency_indian(df[column].median()):,.2f }**, while the other half are above it.
 
-• The recorded values range from **{df[column].min():,.2f}** to **{df[column].max():,.2f}**.
+• The recorded values range from **{format_currency_indian(df[column].min()):,.2f }** to **{format_currency_indian(df[column].max()):,.2f }**.
 
-• The overall spread of the data is **{df[column].std():,.2f}**, indicating how much the values vary from the average.
+• The overall spread of the data is **{format_currency_indian(df[column].std()):,.2f}**, indicating how much the values vary from the average.
 """
         )
 
