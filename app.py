@@ -464,7 +464,14 @@ if st.session_state.uploaded:
                 ):
                     st.session_state.show_validation_dialog = True
                     st.rerun()
+if "validation_started" not in st.session_state:
+    st.session_state.validation_started = False
 
+if "validation_complete" not in st.session_state:
+    st.session_state.validation_complete = False
+
+if "show_validation_dialog" not in st.session_state:
+    st.session_state.show_validation_dialog = False
 if st.session_state.show_validation_dialog:
     validation_window()
 
