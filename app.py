@@ -693,3 +693,92 @@ if st.session_state.validation_complete:
         )
 
     st.divider()
+
+    #==========================================================================================================================================================================================
+    #                 DISTRIBUTION ANALYSIS
+    #==========================================================================================================================================================================================
+
+    st.markdown("## 📊 Distribution Analysis")
+    st.caption("Explore the distribution of important numerical variables in the movie dataset.")
+
+    variables = [
+        ("budget", "💸 Budget Distribution"),
+        ("revenue", "💰 Revenue Distribution"),
+        ("runtime", "⏱ Runtime Distribution"),
+        ("popularity", "📈 Popularity Distribution"),
+        ("vote_average", "⭐ Vote Average Distribution")
+    ]
+
+    for column, title in variables:
+
+        st.markdown(f"### {title}")
+
+        col1, col2 = st.columns(2)
+
+        # ---------------- Histogram ---------------- #
+
+        with col1:
+
+            fig = px.histogram(
+                df,
+                x=column,
+                nbins=30,
+                title=f"{column.replace('_',' ').title()} Histogram",
+                color_discrete_sequence=["#4F8BF9"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=380,
+                margin=dict(l=20, r=20, t=50, b=20),
+                xaxis_title=column.replace("_"," ").title(),
+                yaxis_title="Frequency"
+            )
+
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+
+        # ---------------- Box Plot ---------------- #
+
+        with col2:
+
+            fig = px.box(
+                df,
+                y=column,
+                title=f"{column.replace('_',' ').title()} Box Plot",
+                color_discrete_sequence=["#FF6B6B"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=380,
+                margin=dict(l=20, r=20, t=50, b=20),
+                yaxis_title=column.replace("_"," ").title()
+            )
+
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+
+        # ---------------- Quick Summary ---------------- #
+
+        st.info(
+            f"""
+    **Summary**
+
+    • Mean : **{df[column].mean():,.2f}**
+
+    • Median : **{df[column].median():,.2f}**
+
+    • Minimum : **{df[column].min():,.2f}**
+
+    • Maximum : **{df[column].max():,.2f}**
+
+    • Standard Deviation : **{df[column].std():,.2f}**
+    """
+        )
+
+        st.divider()
