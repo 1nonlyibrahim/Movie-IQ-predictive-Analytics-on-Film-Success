@@ -765,7 +765,7 @@ if st.session_state.validation_complete:
         with col2:
 
             fig = px.box(
-                df,
+                plot_df,
                 y=column,
                 title=f"{column.replace('_',' ').title()} Box Plot",
                 color_discrete_sequence=["#FF6B6B"]
@@ -775,7 +775,7 @@ if st.session_state.validation_complete:
                 template="plotly_dark",
                 height=380,
                 margin=dict(l=20, r=20, t=50, b=20),
-                yaxis_title=column.replace("_"," ").title()
+                yaxis_title=x_title
             )
 
             st.plotly_chart(
