@@ -479,30 +479,18 @@ if st.session_state.show_validation_dialog:
 #🎬 Movie Success Predictor
 #==================================================================================================================================================================================================================================
 if st.session_state.validation_complete:
-    st.markdown(
-                """
-                <h1 style="
-                    text-align:center;
-                    font-size:60px;
-                    font-weight:700;
-                    margin-bottom:10px;
-                    margin-top:0px;
-                ">
-                    🎬 Movie Success Predictor
-                </h1>
-
-                <p style="
-                    text-align:center;
-                    font-size:22px;
-                    color:#A9A9A9;
-                    margin-top:0px;
-                    margin-bottom:25px;
-                ">
-                    Enter your movie details and get an instant success prediction powered by Artificial Intelligence.
-                </p>
-                """,
-                unsafe_allow_html=True
-            )
+    st.markdown("""
+        <style>
+        .mspbutton {
+        font-size: 22px;
+        font-weight: bold;
+        color: #4F8BF9;
+        text-align: center;
+        padding: 10px;
+        }
+        </style>
+        """, unsafe_allow_html=True
+    )   
 
     @st.dialog("🎬 Movie Success Prediction", width="large")
     def prediction_window():
@@ -571,13 +559,14 @@ div.stButton > button {
     border-radius: 15px !important;
 }
 </style>""", unsafe_allow_html=True)
-
+    st.markdown('<div class="mspbutton">', unsafe_allow_html=True)
     if st.button(
         "🎬 Movie Success Predictor",
         use_container_width=True,   
         type="primary"
     ):
         prediction_window()
+st.divider()
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
