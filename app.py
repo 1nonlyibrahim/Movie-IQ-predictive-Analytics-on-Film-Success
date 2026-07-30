@@ -726,8 +726,8 @@ if st.session_state.validation_complete:
                 template="plotly_dark",
                 height=380,
                 margin=dict(l=20, r=20, t=50, b=20),
-                xaxis_title=column.replace("_"," ").title(),
-                yaxis_title="Frequency"
+                xaxis_title=f"{column.replace('_',' ').title()}(₹ Crores)",
+                yaxis_title="No. of Movies"
             )
 
             st.plotly_chart(
