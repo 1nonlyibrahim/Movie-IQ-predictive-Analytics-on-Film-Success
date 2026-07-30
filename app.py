@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
 from scipy import stats
+from scipy.stats import ttest_ind, chi2_contingency
 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -16,6 +17,7 @@ from sklearn.metrics import (
     f1_score,
     confusion_matrix,
     classification_report,
+    roc_auc_score,
 )
 
 import joblib
@@ -454,6 +456,90 @@ if st.session_state.uploaded:
                 if st.button("Perform Data Validation", type="primary", use_container_width=True):
                     st.session_state.validation_started = True
                     validation_window()
+
+#==================================================================================================================================================================================================================================
+#🎬 Movie Success Predictor
+#==================================================================================================================================================================================================================================
+
+@st.dialog("🎬 Movie Success Prediction", width="large")
+def prediction_window():
+
+    st.write(
+        "Enter the movie details below to predict whether the movie is likely to be successful."
+    )
+
+    budget = st.number_input(
+        "Budget (₹)",
+        min_value=0.0,
+        value=50000000.0
+    )
+
+    runtime = st.number_input(
+        "Runtime (Minutes)",
+        min_value=30,
+        max_value=300,
+        value=120
+    )
+
+    popularity = st.number_input(
+        "Popularity",
+        min_value=0.0,
+        value=20.0
+    )
+
+    vote_average = st.slider(
+        "Expected Rating",
+        0.0,
+        10.0,
+        7.0,
+        0.1
+    )
+
+    genre = st.selectbox(
+        "Genre",
+        sorted(df["genres"].dropna().unique())
+    )
+
+    if st.button(
+        "🚀 Predict Success",
+        use_container_width=True,
+        type="primary"
+    ):
+        if "model" not in st.session_state:
+            st.warning(
+                "Please train the Machine Learning model first."
+            )
+            st.stop()
+
+        model = st.session_state.model
+        input_data = pd.DataFrame(
+            [[budget, runtime, popularity, vote_average]],
+            columns=["budget", "runtime", "popularity", "vote_average"],
+        )
+
+        try:
+            prediction = model.predict(input_data)[0]
+            probability = model.predict_proba(input_data)[0][1]
+        except Exception:
+            st.error("Model is not available or prediction failed.")
+            return
+
+        if prediction == 1:
+            st.success("🎉 This movie is predicted to be Successful!")
+        else:
+            st.error("❌ This movie is predicted to be Unsuccessful.")
+
+        st.metric("Success Probability", f"{probability*100:.2f}%")
+
+col1, col2, col3 = st.columns([1,2,1])
+
+with col2:
+    if st.button(
+        "🎬 Movie Success Predictor",
+        type="primary",
+        use_container_width=True
+    ):
+        prediction_window()
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
@@ -1178,3 +1264,595 @@ if st.session_state.validation_complete:
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+
+    # ==========================================================
+    #          ⭐ RATING & POPULARITY ANALYSIS
+    # ==========================================================
+
+    with st.expander("⭐ Rating & Popularity Analysis", expanded=False):
+
+        st.caption(
+            "Explore audience reception, popularity trends and their relationship with revenue."
+        )
+
+        analysis_df = df.copy()
+
+        # =====================================================
+        # Rating Distribution
+        # =====================================================
+
+        st.subheader("⭐ Rating Distribution")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            fig = px.histogram(
+                analysis_df,
+                x="vote_average",
+                nbins=20,
+                color_discrete_sequence=["#4F8BF9"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=400,
+                xaxis_title="Rating",
+                yaxis_title="Number of Movies"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+
+            fig = px.box(
+                analysis_df,
+                y="vote_average",
+                color_discrete_sequence=["#FF6B6B"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=400,
+                yaxis_title="Rating"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Popularity Distribution
+        # =====================================================
+
+        st.subheader("🔥 Popularity Distribution")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            fig = px.histogram(
+                analysis_df,
+                x="popularity",
+                nbins=30,
+                color_discrete_sequence=["#00CC96"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=400,
+                xaxis_title="Popularity",
+                yaxis_title="Number of Movies"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+
+            fig = px.box(
+                analysis_df,
+                y="popularity",
+                color_discrete_sequence=["#FFA15A"]
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=400,
+                yaxis_title="Popularity"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Popularity vs Rating
+        # =====================================================
+
+        st.subheader("📈 Popularity vs Rating")
+
+        fig = px.scatter(
+            analysis_df,
+            x="popularity",
+            y="vote_average",
+            hover_name="title",
+            size="revenue",
+            color="vote_average",
+            color_continuous_scale="Viridis"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=550,
+            xaxis_title="Popularity",
+            yaxis_title="Rating"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Revenue vs Rating
+        # =====================================================
+
+        st.subheader("💰 Revenue vs Rating")
+
+        revenue_df = analysis_df.copy()
+        revenue_df["Revenue (Cr)"] = revenue_df["revenue"] / 1e7
+
+        fig = px.scatter(
+            revenue_df,
+            x="vote_average",
+            y="Revenue (Cr)",
+            hover_name="title",
+            size="popularity",
+            color="Revenue (Cr)",
+            color_continuous_scale="Greens"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=550,
+            xaxis_title="Rating",
+            yaxis_title="Revenue (₹ Crore)"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Popularity vs Revenue
+        # =====================================================
+
+        st.subheader("🔥 Popularity vs Revenue")
+
+        fig = px.scatter(
+            revenue_df,
+            x="popularity",
+            y="Revenue (Cr)",
+            hover_name="title",
+            size="vote_average",
+            color="Revenue (Cr)",
+            color_continuous_scale="Plasma"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=550,
+            xaxis_title="Popularity",
+            yaxis_title="Revenue (₹ Crore)"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ==========================================================
+    #                🔗 CORRELATION ANALYSIS
+    # ==========================================================
+
+    with st.expander("🔗 Correlation Analysis", expanded=False):
+
+        st.caption(
+            "Analyze relationships between numerical variables to identify strong positive and negative correlations."
+        )
+
+        corr_df = df.copy()
+
+        numeric_df = corr_df.select_dtypes(include="number")
+
+        correlation_matrix = numeric_df.corr(numeric_only=True)
+
+        # =====================================================
+        # Correlation Heatmap
+        # =====================================================
+
+        st.subheader("🔥 Correlation Heatmap")
+
+        fig = px.imshow(
+            correlation_matrix,
+            text_auto=".2f",
+            color_continuous_scale="RdBu_r",
+            aspect="auto"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=650
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # =====================================================
+        # Correlation Matrix
+        # =====================================================
+
+        st.subheader("📋 Correlation Matrix")
+
+        st.dataframe(
+            correlation_matrix.style.format("{:.2f}"),
+            use_container_width=True
+        )
+
+        st.divider()
+
+        # =====================================================
+        # Strongest Positive & Negative Correlation
+        # =====================================================
+
+        corr_pairs = (
+            correlation_matrix
+            .where(np.triu(np.ones(correlation_matrix.shape), k=1).astype(bool))
+            .stack()
+            .reset_index()
+        )
+
+        corr_pairs.columns = [
+            "Variable 1",
+            "Variable 2",
+            "Correlation"
+        ]
+
+        strongest_positive = corr_pairs.loc[
+            corr_pairs["Correlation"].idxmax()
+        ]
+
+        strongest_negative = corr_pairs.loc[
+            corr_pairs["Correlation"].idxmin()
+        ]
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.success("📈 Strongest Positive Correlation")
+
+            st.metric(
+                label=f"{strongest_positive['Variable 1']} ↔ {strongest_positive['Variable 2']}",
+                value=f"{strongest_positive['Correlation']:.2f}"
+            )
+
+        with col2:
+
+            st.error("📉 Strongest Negative Correlation")
+
+            st.metric(
+                label=f"{strongest_negative['Variable 1']} ↔ {strongest_negative['Variable 2']}",
+                value=f"{strongest_negative['Correlation']:.2f}"
+            )
+
+    # ==========================================================
+    #               📊 STATISTICAL ANALYSIS
+    # ==========================================================
+
+    with st.expander("📊 Statistical Analysis", expanded=False):
+
+        st.caption(
+            "Perform statistical hypothesis tests to identify significant relationships in the dataset."
+        )
+
+        stats_df = df.copy()
+
+        # ------------------------------------------------------
+        # Define Success
+        # ------------------------------------------------------
+
+        SUCCESS_THRESHOLD = 7.0
+
+        stats_df["Successful"] = (
+            stats_df["vote_average"] >= SUCCESS_THRESHOLD
+        )
+
+        # ------------------------------------------------------
+        # T-Test
+        # ------------------------------------------------------
+
+        st.subheader("📈 Independent T-Test")
+
+        success_revenue = stats_df.loc[
+            stats_df["Successful"],
+            "revenue"
+        ].dropna()
+
+        failure_revenue = stats_df.loc[
+            ~stats_df["Successful"],
+            "revenue"
+        ].dropna()
+
+        t_stat, t_pvalue = ttest_ind(
+            success_revenue,
+            failure_revenue,
+            equal_var=False
+        )
+
+        decision = (
+            "Reject Null Hypothesis"
+            if t_pvalue < 0.05
+            else "Fail to Reject Null Hypothesis"
+        )
+
+        interpretation = (
+            "There is a statistically significant difference in average revenue between successful and unsuccessful movies."
+            if t_pvalue < 0.05
+            else
+            "No statistically significant difference in average revenue was found."
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("T Statistic", f"{t_stat:.3f}")
+
+        with col2:
+            st.metric("P-value", f"{t_pvalue:.5f}")
+
+        st.info(f"**Decision:** {decision}")
+
+        st.success(f"**Interpretation:** {interpretation}")
+
+        st.divider()
+
+        # ------------------------------------------------------
+        # Chi-Square Test
+        # ------------------------------------------------------
+
+        st.subheader("🎭 Chi-Square Test")
+
+        genre_df = stats_df.copy()
+
+        genre_df["genres"] = genre_df["genres"].fillna("Unknown")
+
+        genre_df = (
+            genre_df
+            .assign(genres=genre_df["genres"].str.split("|"))
+            .explode("genres")
+        )
+
+        contingency_table = pd.crosstab(
+            genre_df["genres"],
+            genre_df["Successful"]
+        )
+
+        chi2, chi_pvalue, dof, expected = chi2_contingency(
+            contingency_table
+        )
+
+        decision = (
+            "Reject Null Hypothesis"
+            if chi_pvalue < 0.05
+            else "Fail to Reject Null Hypothesis"
+        )
+
+        interpretation = (
+            "Movie genre and success are statistically associated."
+            if chi_pvalue < 0.05
+            else
+            "Movie genre and success appear to be independent."
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Chi-Square Statistic", f"{chi2:.3f}")
+
+        with col2:
+            st.metric("P-value", f"{chi_pvalue:.5f}")
+
+        st.info(f"**Decision:** {decision}")
+
+        st.success(f"**Interpretation:** {interpretation}")
+
+    # ==========================================================
+    #                  🤖 MACHINE LEARNING
+    # ==========================================================
+
+    with st.expander("🤖 Machine Learning", expanded=False):
+
+        st.caption(
+            "Train a Random Forest model to classify whether a movie is successful."
+        )
+
+        ml_df = df.copy()
+
+        # ------------------------------------------------------
+        # Target Variable
+        # ------------------------------------------------------
+
+        SUCCESS_THRESHOLD = 7.0
+
+        ml_df["Success"] = (
+            ml_df["vote_average"] >= SUCCESS_THRESHOLD
+        ).astype(int)
+
+        # ------------------------------------------------------
+        # Features
+        # ------------------------------------------------------
+
+        FEATURES = [
+            "budget",
+            "runtime",
+            "popularity"
+        ]
+
+        X = ml_df[FEATURES]
+
+        y = ml_df["Success"]
+
+        # ------------------------------------------------------
+        # Train Test Split
+        # ------------------------------------------------------
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=0.20,
+            random_state=42,
+            stratify=y
+        )
+
+        # ------------------------------------------------------
+        # Model
+        # ------------------------------------------------------
+
+        model = RandomForestClassifier(
+            n_estimators=200,
+            random_state=42
+        )
+
+        model.fit(X_train, y_train)
+
+        st.session_state.model = model
+
+        predictions = model.predict(X_test)
+
+        probabilities = model.predict_proba(X_test)[:, 1]
+
+        # ------------------------------------------------------
+        # Metrics
+        # ------------------------------------------------------
+
+        accuracy = accuracy_score(y_test, predictions)
+
+        precision = precision_score(y_test, predictions)
+
+        recall = recall_score(y_test, predictions)
+
+        f1 = f1_score(y_test, predictions)
+
+        roc = roc_auc_score(y_test, probabilities)
+
+        st.subheader("📈 Model Performance")
+
+        c1, c2, c3 = st.columns(3)
+
+        c1.metric("Accuracy", f"{accuracy:.2%}")
+
+        c2.metric("Precision", f"{precision:.2%}")
+
+        c3.metric("Recall", f"{recall:.2%}")
+
+        c1, c2 = st.columns(2)
+
+        c1.metric("F1 Score", f"{f1:.2%}")
+
+        c2.metric("ROC AUC", f"{roc:.2%}")
+
+        st.divider()
+
+        # ------------------------------------------------------
+        # Confusion Matrix
+        # ------------------------------------------------------
+
+        st.subheader("📊 Confusion Matrix")
+
+        cm = confusion_matrix(y_test, predictions)
+
+        fig = px.imshow(
+            cm,
+            text_auto=True,
+            color_continuous_scale="Blues",
+            labels=dict(
+                x="Predicted",
+                y="Actual",
+                color="Count"
+            ),
+            x=["Not Successful", "Successful"],
+            y=["Not Successful", "Successful"]
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+        # ------------------------------------------------------
+        # Classification Report
+        # ------------------------------------------------------
+
+        st.subheader("📋 Classification Report")
+
+        report = classification_report(
+            y_test,
+            predictions,
+            output_dict=True
+        )
+
+        report_df = (
+            pd.DataFrame(report)
+            .transpose()
+            .round(3)
+        )
+
+        st.dataframe(
+            report_df,
+            use_container_width=True
+        )
+
+        st.divider()
+
+        # ------------------------------------------------------
+        # Feature Importance
+        # ------------------------------------------------------
+
+        st.subheader("⭐ Feature Importance")
+
+        importance_df = pd.DataFrame({
+
+            "Feature": FEATURES,
+
+            "Importance": model.feature_importances_
+
+        })
+
+        importance_df = importance_df.sort_values(
+            "Importance",
+            ascending=False
+        )
+
+        fig = px.bar(
+            importance_df,
+            x="Feature",
+            y="Importance",
+            color="Importance",
+            color_continuous_scale="Viridis",
+            text_auto=".3f"
+        )
+
+        fig.update_layout(
+            template="plotly_dark",
+            height=500
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+        st.success("✅ Model Used: Random Forest Classifier")
