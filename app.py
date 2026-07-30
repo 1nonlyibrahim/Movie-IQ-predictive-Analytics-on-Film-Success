@@ -731,11 +731,19 @@ if st.session_state.validation_complete:
 
         with col1:
 
+            plot_df = df.copy()
+
+            if column in ["budget", "revenue"]:
+                plot_df[column] = plot_df[column] / 1e7
+                x_title = f"{column.replace('_', ' ').title()} (₹ Crore)"
+            else:
+                x_title = column.replace("_", " ").title()
+
             fig = px.histogram(
-                df,
+                plot_df,
                 x=column,
                 nbins=30,
-                title=f"{column.replace('_',' ').title()} Histogram",
+                title=f"{column.replace('_',' ').title()} Distribution",
                 color_discrete_sequence=["#4F8BF9"]
             )
 
@@ -743,7 +751,7 @@ if st.session_state.validation_complete:
                 template="plotly_dark",
                 height=380,
                 margin=dict(l=20, r=20, t=50, b=20),
-                xaxis_title=f"{column.replace('_',' ').title()}  (₹ Crores)",
+                xaxis_title=x_title,
                 yaxis_title="No. of Movies"
             )
 
