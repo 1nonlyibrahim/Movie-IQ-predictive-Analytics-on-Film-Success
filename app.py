@@ -582,17 +582,34 @@ if st.session_state.validation_complete:
     #==========================================================================================================================================================================================
     def format_currency_indian(num):
         num = float(num)
+        sign = "-" if num < 0 else ""
+        num = abs(num)
 
-        if abs(num) >= 1e7:      # 1 Crore
-            return f"₹{num/1e7:,.2f} Cr"
+        if num >= 1e7:  # Crore
+            return f"{sign}₹{num/1e7:,.2f} Cr"
 
-        elif abs(num) >= 1e5:    # 1 Lakh
-            return f"₹{num/1e5:,.2f} L"
+        elif num >= 1e5:  # Lakh
+            return f"{sign}₹{num/1e5:,.2f} L"
 
-        elif abs(num) >= 1e3:    # 1 Thousand
-            return f"₹{num/1e3:,.2f} K"
+        else:
+            # Indian comma format
+            integer, decimal = f"{num:.2f}".split(".")
 
-        return f"₹{num:,.2f}"
+            if len(integer) > 3:
+                last3 = integer[-3:]
+                rest = integer[:-3]
+
+                parts = []
+                while len(rest) > 2:
+                    parts.insert(0, rest[-2:])
+                    rest = rest[:-2]
+
+                if rest:
+                    parts.insert(0, rest)
+
+                integer = ",".join(parts + [last3])
+
+            return f"{sign}₹{integer}.{decimal}"
 
     st.markdown("## 📊 Executive Overview")
 
