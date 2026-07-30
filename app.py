@@ -479,33 +479,34 @@ if st.session_state.show_validation_dialog:
 #🎬 Movie Success Predictor
 #==================================================================================================================================================================================================================================
 if st.session_state.validation_complete:
+    st.markdown(
+                """
+                <h1 style="
+                    text-align:center;
+                    font-size:60px;
+                    font-weight:700;
+                    margin-bottom:10px;
+                    margin-top:0px;
+                ">
+                    🎬 Movie Success Predictor
+                </h1>
+
+                <p style="
+                    text-align:center;
+                    font-size:22px;
+                    color:#A9A9A9;
+                    margin-top:0px;
+                    margin-bottom:25px;
+                ">
+                    Enter your movie details and get an instant success prediction powered by Artificial Intelligence.
+                </p>
+                """,
+                unsafe_allow_html=True
+            )
+
     @st.dialog("🎬 Movie Success Prediction", width="large")
     def prediction_window():
-        st.markdown(
-            """
-            <h1 style="
-                text-align:center;
-                font-size:60px;
-                font-weight:700;
-                margin-bottom:10px;
-                margin-top:0px;
-            ">
-                🎬 Movie Success Predictor
-            </h1>
-
-            <p style="
-                text-align:center;
-                font-size:22px;
-                color:#A9A9A9;
-                margin-top:0px;
-                margin-bottom:25px;
-            ">
-                Enter your movie details and get an instant success prediction powered by Artificial Intelligence.
-            </p>
-            """,
-            unsafe_allow_html=True
-        )
-
+        
         df = st.session_state.df
 
         budget = st.number_input("Budget", min_value=0.0)
@@ -2060,45 +2061,45 @@ if st.session_state.validation_complete:
         # Display Insights
         # ---------------------------------------------------------
 
-    st.write(
-        f"🎭 **{highest_revenue_genre}** is currently the highest revenue-generating genre in the selected dataset, indicating strong commercial performance compared to other genres."
-    )
+        st.write(
+            f"🎭 **{highest_revenue_genre}** is currently the highest revenue-generating genre in the selected dataset, indicating strong commercial performance compared to other genres."
+        )
 
-    st.write(
-        f"⭐ Movies in the **{highest_rated_genre}** genre receive the highest average audience ratings, suggesting greater viewer satisfaction."
-    )
+        st.write(
+            f"⭐ Movies in the **{highest_rated_genre}** genre receive the highest average audience ratings, suggesting greater viewer satisfaction."
+        )
 
-    st.write(
-        f"💰 Movies with budgets between **₹{best_budget.left/1e7:.2f} Cr** and **₹{best_budget.right/1e7:.2f} Cr** deliver the highest average return on investment (ROI)."
-    )
+        st.write(
+            f"💰 Movies with budgets between **₹{best_budget.left/1e7:.2f} Cr** and **₹{best_budget.right/1e7:.2f} Cr** deliver the highest average return on investment (ROI)."
+        )
 
-    st.write(
-        f"⏱ Movies with runtimes between **{best_runtime.left:.0f}** and **{best_runtime.right:.0f} minutes** tend to achieve the best audience ratings."
-    )
+        st.write(
+            f"⏱ Movies with runtimes between **{best_runtime.left:.0f}** and **{best_runtime.right:.0f} minutes** tend to achieve the best audience ratings."
+        )
 
-    st.write(
-        f"✅ Approximately **{success_percentage:.2f}%** of the movies in the current selection are classified as commercially successful."
-    )
+        st.write(
+            f"✅ Approximately **{success_percentage:.2f}%** of the movies in the current selection are classified as commercially successful."
+        )
 
-    st.write(
-        f"🏆 **{highest_roi_movie}** delivers the highest return on investment, making it the most financially efficient movie in the selected dataset."
-    )
+        st.write(
+            f"🏆 **{highest_roi_movie}** delivers the highest return on investment, making it the most financially efficient movie in the selected dataset."
+        )
 
-    st.write(
-        f"🎬 **{highest_revenue_movie}** generated the highest total box office revenue among all filtered movies."
-    )
+        st.write(
+            f"🎬 **{highest_revenue_movie}** generated the highest total box office revenue among all filtered movies."
+        )
 
-    st.write(
-        f"🌟 **{highest_rated_movie}** has the highest audience rating, reflecting exceptional viewer reception."
-    )
+        st.write(
+            f"🌟 **{highest_rated_movie}** has the highest audience rating, reflecting exceptional viewer reception."
+        )
 
-    st.write(
-        f"🔥 **{most_popular_movie}** is the most popular movie based on the popularity score, indicating strong public interest."
-    )
+        st.write(
+            f"🔥 **{most_popular_movie}** is the most popular movie based on the popularity score, indicating strong public interest."
+        )
 
-    st.write(
-        f"⌛ The average runtime of the selected movies is **{avg_runtime:.1f} minutes**, providing an overview of the typical movie length."
-    )
+        st.write(
+            f"⌛ The average runtime of the selected movies is **{avg_runtime:.1f} minutes**, providing an overview of the typical movie length."
+        )
 
     #==================================================================================================================================================================================================================================
     # 📝 Business Recommendations
