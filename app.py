@@ -717,7 +717,7 @@ if st.session_state.validation_complete:
             fig = px.histogram(
                 df,
                 x=column,
-                nbins=30,
+                nbins=20,
                 title=f"{column.replace('_',' ').title()} Histogram",
                 color_discrete_sequence=["#4F8BF9"]
             )
@@ -726,7 +726,7 @@ if st.session_state.validation_complete:
                 template="plotly_dark",
                 height=380,
                 margin=dict(l=20, r=20, t=50, b=20),
-                xaxis_title=f"{column.replace('_',' ').title()}(₹ Crores)",
+                xaxis_title=f"{column.replace('_',' ').title()} (₹ Crores)",
                 yaxis_title="No. of Movies"
             )
 
