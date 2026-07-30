@@ -483,13 +483,25 @@ if st.session_state.validation_complete:
     def prediction_window():
         st.markdown(
             """
-            <h1 style="text-align:center; font-weight:700; font-size: 50px">
+            <h1 style="
+                text-align:center;
+                font-size:60px;
+                font-weight:700;
+                margin-bottom:10px;
+                margin-top:0px;
+            ">
                 🎬 Movie Success Predictor
             </h1>
 
-            <h4 style="text-align:center; color:#A9A9A9; font-weight:400;">
+            <p style="
+                text-align:center;
+                font-size:22px;
+                color:#A9A9A9;
+                margin-top:0px;
+                margin-bottom:25px;
+            ">
                 Enter your movie details and get an instant success prediction powered by Artificial Intelligence.
-            </h4>
+            </p>
             """,
             unsafe_allow_html=True
         )
@@ -596,7 +608,7 @@ if st.session_state.validation_complete:
 
     st.sidebar.title("📂 Dataset Info")
 
-    st.sidebar.divider()
+    
 
     # ---------------- Dataset Status ---------------- #
 
@@ -2048,26 +2060,45 @@ if st.session_state.validation_complete:
         # Display Insights
         # ---------------------------------------------------------
 
-        st.success(f"🎭 **Highest Revenue Genre:** {highest_revenue_genre}")
+    st.write(
+        f"🎭 **{highest_revenue_genre}** is currently the highest revenue-generating genre in the selected dataset, indicating strong commercial performance compared to other genres."
+    )
 
-        st.success(f"⭐ **Highest Rated Genre:** {highest_rated_genre}")
+    st.write(
+        f"⭐ Movies in the **{highest_rated_genre}** genre receive the highest average audience ratings, suggesting greater viewer satisfaction."
+    )
 
-        st.success(f"💰 **Most Profitable Budget Range:** {best_budget}")
+    st.write(
+        f"💰 Movies with budgets between **₹{best_budget.left/1e7:.2f} Cr** and **₹{best_budget.right/1e7:.2f} Cr** deliver the highest average return on investment (ROI)."
+    )
 
-        st.success(f"⏱ **Best Runtime Range:** {best_runtime}")
+    st.write(
+        f"⏱ Movies with runtimes between **{best_runtime.left:.0f}** and **{best_runtime.right:.0f} minutes** tend to achieve the best audience ratings."
+    )
 
-        st.success(f"✅ **Overall Success Rate:** {success_percentage:.2f}%")
+    st.write(
+        f"✅ Approximately **{success_percentage:.2f}%** of the movies in the current selection are classified as commercially successful."
+    )
 
-        st.success(f"🏆 **Highest ROI Movie:** {highest_roi_movie}")
+    st.write(
+        f"🏆 **{highest_roi_movie}** delivers the highest return on investment, making it the most financially efficient movie in the selected dataset."
+    )
 
-        st.success(f"🎬 **Highest Revenue Movie:** {highest_revenue_movie}")
+    st.write(
+        f"🎬 **{highest_revenue_movie}** generated the highest total box office revenue among all filtered movies."
+    )
 
-        st.success(f"🌟 **Highest Rated Movie:** {highest_rated_movie}")
+    st.write(
+        f"🌟 **{highest_rated_movie}** has the highest audience rating, reflecting exceptional viewer reception."
+    )
 
-        st.success(f"🔥 **Most Popular Movie:** {most_popular_movie}")
+    st.write(
+        f"🔥 **{most_popular_movie}** is the most popular movie based on the popularity score, indicating strong public interest."
+    )
 
-        st.success(f"⌛ **Average Runtime:** {avg_runtime:.1f} minutes")
-
+    st.write(
+        f"⌛ The average runtime of the selected movies is **{avg_runtime:.1f} minutes**, providing an overview of the typical movie length."
+    )
 
     #==================================================================================================================================================================================================================================
     # 📝 Business Recommendations
@@ -2148,42 +2179,42 @@ if st.session_state.validation_complete:
 
         st.markdown("### 📌 Strategic Recommendations")
 
-        st.success(
+        st.write(
             f"1️⃣ Prioritize **{best_genre}** movies, as they generate the highest average revenue."
         )
 
-        st.success(
+        st.write(
             f"2️⃣ Target a runtime between **{best_runtime.left:.0f}–{best_runtime.right:.0f} minutes**, where movies tend to receive better ratings."
         )
 
-        st.success(
+        st.write(
             f"3️⃣ Focus investment within the **₹{best_budget.left/1e7:.2f}–₹{best_budget.right/1e7:.2f} Crore** budget range, which delivers the highest ROI."
         )
 
-        st.success(
+        st.write(
             f"4️⃣ Increase marketing efforts for movies expected to exceed the average popularity score of **{avg_popularity:.2f}**."
         )
 
-        st.success(
+        st.write(
             f"5️⃣ Aim for an audience rating above **{avg_rating:.2f}**, as highly rated movies generally perform better commercially."
         )
 
-        st.success(
+        st.write(
             "6️⃣ Optimize production budgets instead of simply increasing spending, as higher budgets do not always guarantee higher revenue."
         )
 
-        st.success(
+        st.write(
             "7️⃣ Prioritize projects with strong ROI potential before approving large production budgets."
         )
 
-        st.success(
+        st.write(
             "8️⃣ Use historical performance by genre to guide future investment decisions."
         )
 
-        st.success(
+        st.write(
             f"9️⃣ Maintain or improve the current movie success rate of **{success_rate:.2f}%** through data-driven project selection."
         )
 
-        st.success(
+        st.write(
             "🔟 Combine audience ratings, popularity, and financial metrics when deciding future movie investments instead of relying on a single metric."
         )
