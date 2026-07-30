@@ -465,7 +465,7 @@ if st.session_state.validation_complete:
     def prediction_window():
         st.markdown(
             """
-            <h1 style="text-align:center; font-weight:700;">
+            <h1 style="text-align:center; font-weight:700; font-size: 50px">
                 🎬 Movie Success Predictor
             </h1>
 
@@ -506,37 +506,47 @@ if st.session_state.validation_complete:
             )
 
             prediction = model.predict(input_data)[0]
-
             probability = model.predict_proba(input_data)[0][1]
+
+            confidence = max(probability, 1 - probability)
 
             if prediction == 1:
                 st.success("🎉 Movie is predicted to be Successful!")
             else:
                 st.error("❌ Movie is predicted to be Unsuccessful.")
 
-            st.metric(
-                "Success Probability",
-                f"{probability*100:.2f}%"
-            )
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.metric(
+                    "Success Probability",
+                    f"{probability*100:.2f}%"
+                )
+
+            with col2:
+                st.metric(
+                    "Confidence",
+                    f"{confidence*100:.2f}%"
+                )
 
     col1, col2, col3 = st.columns([1, 3, 1])
 
     with col2:
         st.markdown("""<style>
-    div.stButton > button {
-        height: 70px !important;
-        font-size: 24px !important;
-        font-weight: 700 !important;
-        border-radius: 15px !important;
-    }
+div.stButton > button {
+    height: 70px !important;
+    font-size: 50px !important;
+    font-weight: 700 !important;
+    border-radius: 15px !important;
+}
 </style>""", unsafe_allow_html=True)
 
-        if st.button(
-            "🎬 Movie Success Predictor",
-            use_container_width=True,   
-            type="primary"
-        ):
-            prediction_window()
+    if st.button(
+        "🎬 Movie Success Predictor",
+        use_container_width=True,   
+        type="primary"
+    ):
+        prediction_window()
 
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
@@ -547,6 +557,23 @@ if st.session_state.validation_complete:
 
     df = st.session_state.df
 
+    st.sidebar.title("📊 Dashboard Navigation")
+
+    analysis_section = st.sidebar.radio(
+        "Select Analysis",
+        [
+            "📈 Distribution Analysis",
+            "🎭 Genre Analysis",
+            "💰 Financial Analysis",
+            "⭐ Rating & Popularity Analysis",
+            "🔗 Correlation Analysis",
+            "📊 Statistical Analysis",
+            "🎯 Movie Success Prediction",
+            "💡 Business Insights",
+            "📝 Business Recommendations",
+            "🤖 Machine Learning"
+        ]
+    )
     st.sidebar.title("📂 Dataset Info")
 
     st.sidebar.divider()
@@ -790,10 +817,10 @@ if st.session_state.validation_complete:
 
     st.divider()
 
-    with st.expander("📊 Distribution Analysis", expanded=False):
+    if analysis_section == "📈 Distribution Analysis":
 
         #==========================================================================================================================================================================================
-        #                 DISTRIBUTION ANALYSIS
+        #               📈  DISTRIBUTION ANALYSIS
         #==========================================================================================================================================================================================
 
         st.markdown("## 📊 Distribution Analysis")
@@ -914,13 +941,13 @@ if st.session_state.validation_complete:
 
             st.divider()
 
-    with st.expander("🎭 Genre Analysis", expanded=False):
+    if analysis_section == "🎭 Genre Analysis":
 
         if st.session_state.get("validation_complete", False):
 
             df = st.session_state.df
             # ==========================================================
-            #                    GENRE ANALYSIS
+            #                   🎭 GENRE ANALYSIS
             # ==========================================================
 
             st.markdown("## 🎭 Genre Analysis")
@@ -1087,7 +1114,7 @@ if st.session_state.validation_complete:
     #                 💰 FINANCIAL ANALYSIS
     # ==========================================================
 
-    with st.expander("💰 Financial Analysis", expanded=False):
+    if analysis_section == "💰 Financial Analysis":
 
         st.caption("Analyze the financial performance of movies based on revenue, budget, profit and return on investment.")
 
@@ -1267,7 +1294,7 @@ if st.session_state.validation_complete:
     #          ⭐ RATING & POPULARITY ANALYSIS
     # ==========================================================
 
-    with st.expander("⭐ Rating & Popularity Analysis", expanded=False):
+    if analysis_section == "⭐ Rating & Popularity Analysis":
 
         st.caption(
             "Explore audience reception, popularity trends and their relationship with revenue."
@@ -1449,7 +1476,7 @@ if st.session_state.validation_complete:
     #                🔗 CORRELATION ANALYSIS
     # ==========================================================
 
-    with st.expander("🔗 Correlation Analysis", expanded=False):
+    if analysis_section == "🔗 Correlation Analysis":
 
         st.caption(
             "Analyze relationships between numerical variables to identify strong positive and negative correlations."
@@ -1545,7 +1572,7 @@ if st.session_state.validation_complete:
     #               📊 STATISTICAL ANALYSIS
     # ==========================================================
 
-    with st.expander("📊 Statistical Analysis", expanded=False):
+    if analysis_section == "📊 Statistical Analysis":
 
         st.caption(
             "Perform statistical hypothesis tests to identify significant relationships in the dataset."
@@ -1666,7 +1693,7 @@ if st.session_state.validation_complete:
     #                  🤖 MACHINE LEARNING
     # ==========================================================
 
-    with st.expander("🤖 Machine Learning", expanded=False):
+    if analysis_section == "🤖 Machine Learning":
 
         st.caption(
             "Train a Random Forest model to classify whether a movie is successful."
@@ -1853,3 +1880,290 @@ if st.session_state.validation_complete:
         )
 
         st.success("✅ Model Used: Random Forest Classifier")
+
+    #==================================================================================================================================================================================================================================
+    # 💡 Business Insights
+    #==================================================================================================================================================================================================================================
+
+    if analysis_section == "💡 Business Insights":
+
+        st.caption(
+            "Automatically generated insights based on the analyzed movie dataset."
+        )
+
+        insight_df = df.copy()
+
+        # ---------------------------------------------------------
+        # Pre-processing
+        # ---------------------------------------------------------
+
+        insight_df["Profit"] = (
+            insight_df["revenue"] - insight_df["budget"]
+        )
+
+        insight_df["ROI"] = np.where(
+            insight_df["budget"] > 0,
+            ((insight_df["revenue"] - insight_df["budget"])
+            / insight_df["budget"]) * 100,
+            0
+        )
+
+        SUCCESS_THRESHOLD = 7.0
+
+        insight_df["Successful"] = np.where(
+            insight_df["vote_average"] >= SUCCESS_THRESHOLD,
+            "Successful",
+            "Not Successful"
+        )
+
+        genre_df = insight_df.copy()
+
+        genre_df["genres"] = genre_df["genres"].str.split("|")
+
+        genre_df = genre_df.explode("genres")
+
+        # ---------------------------------------------------------
+        # Highest Revenue Genre
+        # ---------------------------------------------------------
+
+        highest_revenue_genre = (
+            genre_df.groupby("genres")["revenue"]
+            .mean()
+            .idxmax()
+        )
+
+        # ---------------------------------------------------------
+        # Highest Rated Genre
+        # ---------------------------------------------------------
+
+        highest_rated_genre = (
+            genre_df.groupby("genres")["vote_average"]
+            .mean()
+            .idxmax()
+        )
+
+        # ---------------------------------------------------------
+        # Most Profitable Budget Range
+        # ---------------------------------------------------------
+
+        budget_bins = pd.cut(
+            insight_df["budget"],
+            bins=5
+        )
+
+        best_budget = (
+            insight_df.groupby(budget_bins)["ROI"]
+            .mean()
+            .idxmax()
+        )
+
+        # ---------------------------------------------------------
+        # Best Runtime Range
+        # ---------------------------------------------------------
+
+        runtime_bins = pd.cut(
+            insight_df["runtime"],
+            bins=5
+        )
+
+        best_runtime = (
+            insight_df.groupby(runtime_bins)["vote_average"]
+            .mean()
+            .idxmax()
+        )
+
+        # ---------------------------------------------------------
+        # Success Percentage
+        # ---------------------------------------------------------
+
+        success_percentage = (
+            (insight_df["Successful"] == "Successful")
+            .mean()
+            * 100
+        )
+
+        # ---------------------------------------------------------
+        # Highest ROI Movie
+        # ---------------------------------------------------------
+
+        highest_roi_movie = insight_df.loc[
+            insight_df["ROI"].idxmax(),
+            "title"
+        ]
+
+        # ---------------------------------------------------------
+        # Highest Revenue Movie
+        # ---------------------------------------------------------
+
+        highest_revenue_movie = insight_df.loc[
+            insight_df["revenue"].idxmax(),
+            "title"
+        ]
+
+        # ---------------------------------------------------------
+        # Highest Rated Movie
+        # ---------------------------------------------------------
+
+        highest_rated_movie = insight_df.loc[
+            insight_df["vote_average"].idxmax(),
+            "title"
+        ]
+
+        # ---------------------------------------------------------
+        # Most Popular Movie
+        # ---------------------------------------------------------
+
+        most_popular_movie = insight_df.loc[
+            insight_df["popularity"].idxmax(),
+            "title"
+        ]
+
+        # ---------------------------------------------------------
+        # Average Runtime
+        # ---------------------------------------------------------
+
+        avg_runtime = insight_df["runtime"].mean()
+
+        # ---------------------------------------------------------
+        # Display Insights
+        # ---------------------------------------------------------
+
+        st.success(f"🎭 **Highest Revenue Genre:** {highest_revenue_genre}")
+
+        st.success(f"⭐ **Highest Rated Genre:** {highest_rated_genre}")
+
+        st.success(f"💰 **Most Profitable Budget Range:** {best_budget}")
+
+        st.success(f"⏱ **Best Runtime Range:** {best_runtime}")
+
+        st.success(f"✅ **Overall Success Rate:** {success_percentage:.2f}%")
+
+        st.success(f"🏆 **Highest ROI Movie:** {highest_roi_movie}")
+
+        st.success(f"🎬 **Highest Revenue Movie:** {highest_revenue_movie}")
+
+        st.success(f"🌟 **Highest Rated Movie:** {highest_rated_movie}")
+
+        st.success(f"🔥 **Most Popular Movie:** {most_popular_movie}")
+
+        st.success(f"⌛ **Average Runtime:** {avg_runtime:.1f} minutes")
+
+
+    #==================================================================================================================================================================================================================================
+    # 📝 Business Recommendations
+    #==================================================================================================================================================================================================================================
+
+    if analysis_section == "📝 Business Recommendations":
+
+        st.caption(
+            "Actionable recommendations generated from the analysis to improve future movie performance."
+        )
+
+        recommendation_df = df.copy()
+
+        recommendation_df["Profit"] = (
+            recommendation_df["revenue"] -
+            recommendation_df["budget"]
+        )
+
+        recommendation_df["ROI"] = np.where(
+            recommendation_df["budget"] > 0,
+            ((recommendation_df["revenue"] -
+            recommendation_df["budget"])
+            / recommendation_df["budget"]) * 100,
+            0
+        )
+
+        recommendation_df["Successful"] = np.where(
+            recommendation_df["vote_average"] >= 7,
+            1,
+            0
+        )
+
+        genre_df = recommendation_df.copy()
+
+        genre_df["genres"] = genre_df["genres"].str.split("|")
+
+        genre_df = genre_df.explode("genres")
+
+        # -------------------------------------------------------
+        # Generate Recommendations
+        # -------------------------------------------------------
+
+        best_genre = (
+            genre_df.groupby("genres")["revenue"]
+            .mean()
+            .idxmax()
+        )
+
+        best_runtime = (
+            recommendation_df.groupby(
+                pd.cut(
+                    recommendation_df["runtime"],
+                    bins=5
+                )
+            )["vote_average"]
+            .mean()
+            .idxmax()
+        )
+
+        best_budget = (
+            recommendation_df.groupby(
+                pd.cut(
+                    recommendation_df["budget"],
+                    bins=5
+                )
+            )["ROI"]
+            .mean()
+            .idxmax()
+        )
+
+        success_rate = (
+            recommendation_df["Successful"].mean() * 100
+        )
+
+        avg_rating = recommendation_df["vote_average"].mean()
+
+        avg_popularity = recommendation_df["popularity"].mean()
+
+        st.markdown("### 📌 Strategic Recommendations")
+
+        st.success(
+            f"1️⃣ Prioritize **{best_genre}** movies, as they generate the highest average revenue."
+        )
+
+        st.success(
+            f"2️⃣ Target a runtime between **{best_runtime.left:.0f}–{best_runtime.right:.0f} minutes**, where movies tend to receive better ratings."
+        )
+
+        st.success(
+            f"3️⃣ Focus investment within the **₹{best_budget.left/1e7:.2f}–₹{best_budget.right/1e7:.2f} Crore** budget range, which delivers the highest ROI."
+        )
+
+        st.success(
+            f"4️⃣ Increase marketing efforts for movies expected to exceed the average popularity score of **{avg_popularity:.2f}**."
+        )
+
+        st.success(
+            f"5️⃣ Aim for an audience rating above **{avg_rating:.2f}**, as highly rated movies generally perform better commercially."
+        )
+
+        st.success(
+            "6️⃣ Optimize production budgets instead of simply increasing spending, as higher budgets do not always guarantee higher revenue."
+        )
+
+        st.success(
+            "7️⃣ Prioritize projects with strong ROI potential before approving large production budgets."
+        )
+
+        st.success(
+            "8️⃣ Use historical performance by genre to guide future investment decisions."
+        )
+
+        st.success(
+            f"9️⃣ Maintain or improve the current movie success rate of **{success_rate:.2f}%** through data-driven project selection."
+        )
+
+        st.success(
+            "🔟 Combine audience ratings, popularity, and financial metrics when deciding future movie investments instead of relying on a single metric."
+        )
