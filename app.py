@@ -463,73 +463,56 @@ if st.session_state.uploaded:
 
 @st.dialog("🎬 Movie Success Prediction", width="large")
 def prediction_window():
+    budget = st.number_input("Budget", min_value=0.0)
 
-    st.write(
-        "Enter the movie details below to predict whether the movie is likely to be successful."
-    )
+    runtime = st.number_input("Runtime", min_value=1)
 
-    budget = st.number_input(
-        "Budget (₹)",
-        min_value=0.0,
-        value=50000000.0
-    )
+    popularity = st.number_input("Popularity", min_value=0.0)
 
-    runtime = st.number_input(
-        "Runtime (Minutes)",
-        min_value=30,
-        max_value=300,
-        value=120
-    )
-
-    popularity = st.number_input(
-        "Popularity",
-        min_value=0.0,
-        value=20.0
-    )
-
-    vote_average = st.slider(
-        "Expected Rating",
-        0.0,
-        10.0,
-        7.0,
-        0.1
-    )
+    vote_average = st.slider("Vote Average", 0.0, 10.0, 7.0)
 
     genre = st.selectbox(
         "Genre",
         sorted(df["genres"].dropna().unique())
     )
 
-    if st.button(
-        "🚀 Predict Success",
-        use_container_width=True,
-        type="primary"
-    ):
-        if "model" not in st.session_state:
-            st.warning(
-                "Please train the Machine Learning model first."
-            )
-            st.stop()
+    if st.button("🚀 Predict Success"):
 
-        model = st.session_state.model
-        input_data = pd.DataFrame(
-            [[budget, runtime, popularity, vote_average]],
-            columns=["budget", "runtime", "popularity", "vote_average"],
-        )
+    if "model" not in st.session_state:
 
-        try:
-            prediction = model.predict(input_data)[0]
-            probability = model.predict_proba(input_data)[0][1]
-        except Exception:
-            st.error("Model is not available or prediction failed.")
-            return
+    st.error(
+        "Please open the Machine Learning section first."
+    )
 
-        if prediction == 1:
-            st.success("🎉 This movie is predicted to be Successful!")
-        else:
-            st.error("❌ This movie is predicted to be Unsuccessful.")
+    st.stop()
 
-        st.metric("Success Probability", f"{probability*100:.2f}%")
+model = st.session_state.model
+
+input_data = pd.DataFrame(
+    [[budget, runtime, popularity]],
+    columns=[
+        "budget",
+        "runtime",
+        "popularity"
+    ]
+)
+
+prediction = model.predict(input_data)[0]
+
+probability = model.predict_proba(input_data)[0][1]
+
+if prediction == 1:
+
+    st.success("🎉 Movie is predicted to be Successful!")
+
+else:
+
+    st.error("❌ Movie is predicted to be Unsuccessful.")
+
+st.metric(
+    "Success Probability",
+    f"{probability*100:.2f}%"
+)
 
 col1, col2, col3 = st.columns([1,2,1])
 
