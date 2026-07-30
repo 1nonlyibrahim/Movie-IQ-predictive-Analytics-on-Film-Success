@@ -699,7 +699,6 @@ if st.session_state.validation_complete:
     #==========================================================================================================================================================================================
 
     st.markdown("## 📊 Distribution Analysis")
-    st.caption("Explore the distribution of important numerical variables in the movie dataset.")
 
     variables = [
         ("budget", "💸 Budget Distribution"),
