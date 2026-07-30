@@ -777,17 +777,45 @@ if st.session_state.validation_complete:
 
         # ---------------- Quick Summary ---------------- #
 
+        if column in ["budget", "revenue"]:
+            avg = format_currency_indian(df[column].mean())
+            median = format_currency_indian(df[column].median())
+            minimum = format_currency_indian(df[column].min())
+            maximum = format_currency_indian(df[column].max())
+            std = format_currency_indian(df[column].std())
+
+        elif column == "runtime":
+            avg = f"{df[column].mean():.1f} min"
+            median = f"{df[column].median():.1f} min"
+            minimum = f"{df[column].min():.1f} min"
+            maximum = f"{df[column].max():.1f} min"
+            std = f"{df[column].std():.1f} min"
+
+        elif column == "vote_average":
+            avg = f"{df[column].mean():.2f}/10"
+            median = f"{df[column].median():.2f}/10"
+            minimum = f"{df[column].min():.2f}/10"
+            maximum = f"{df[column].max():.2f}/10"
+            std = f"{df[column].std():.2f}"
+
+        else:   # popularity and any other numeric columns
+            avg = f"{df[column].mean():,.2f}"
+            median = f"{df[column].median():,.2f}"
+            minimum = f"{df[column].min():,.2f}"
+            maximum = f"{df[column].max():,.2f}"
+            std = f"{df[column].std():,.2f}"
+
         st.info(
             f"""
 **📌 Distribution Summary**
 
-• The average **{column.replace('_', ' ').title()}** across all movies is **{format_currency_indian(df[column].mean())}**.
+• The average **{column.replace('_', ' ').title()}** across all movies is **{avg}**.
 
-• Half of the movies have a **{column.replace('_', ' ').title()}** below **{format_currency_indian(df[column].median())}**, while the other half are above it.
+• Half of the movies have a **{column.replace('_', ' ').title()}** below **{median}**, while the other half are above it.
 
-• The recorded values range from **{format_currency_indian(df[column].min())}** to **{format_currency_indian(df[column].max())}**.
+• The recorded values range from **{minimum}** to **{maximum}**.
 
-• The overall spread of the data is **{format_currency_indian(df[column].std())}**, indicating how much the values vary from the average.
+• The overall spread of the data is **{std}**, indicating how much the values vary from the average.
 """
         )
 
