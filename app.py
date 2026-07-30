@@ -477,42 +477,36 @@ def prediction_window():
     )
 
     if st.button("🚀 Predict Success"):
+        if "model" not in st.session_state:
+            st.error(
+                "Please open the Machine Learning section first."
+            )
+            st.stop()
 
-    if "model" not in st.session_state:
+        model = st.session_state.model
 
-    st.error(
-        "Please open the Machine Learning section first."
-    )
+        input_data = pd.DataFrame(
+            [[budget, runtime, popularity]],
+            columns=[
+                "budget",
+                "runtime",
+                "popularity"
+            ]
+        )
 
-    st.stop()
+        prediction = model.predict(input_data)[0]
 
-model = st.session_state.model
+        probability = model.predict_proba(input_data)[0][1]
 
-input_data = pd.DataFrame(
-    [[budget, runtime, popularity]],
-    columns=[
-        "budget",
-        "runtime",
-        "popularity"
-    ]
-)
+        if prediction == 1:
+            st.success("🎉 Movie is predicted to be Successful!")
+        else:
+            st.error("❌ Movie is predicted to be Unsuccessful.")
 
-prediction = model.predict(input_data)[0]
-
-probability = model.predict_proba(input_data)[0][1]
-
-if prediction == 1:
-
-    st.success("🎉 Movie is predicted to be Successful!")
-
-else:
-
-    st.error("❌ Movie is predicted to be Unsuccessful.")
-
-st.metric(
-    "Success Probability",
-    f"{probability*100:.2f}%"
-)
+        st.metric(
+            "Success Probability",
+            f"{probability*100:.2f}%"
+        )
 
 col1, col2, col3 = st.columns([1,2,1])
 
