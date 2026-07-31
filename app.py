@@ -640,125 +640,112 @@ if st.session_state.validation_complete:
                 ]
             )
 
-    filtered_df = df.copy()
-    # Genre Filter
-    if selected_genres:
+        filtered_df = df.copy()
+        # Genre Filter
+        if selected_genres:
+            filtered_df = filtered_df[
+                filtered_df["genres"].isin(selected_genres)
+            ]
+
+        # Budget Filter
         filtered_df = filtered_df[
-            filtered_df["genres"].isin(selected_genres)
-        ]
-
-    # Budget Filter
-    filtered_df = filtered_df[
-        filtered_df["budget"].between(
-            budget_range[0],
-            budget_range[1]
-        )
-    ]
-
-    # Revenue Filter
-    filtered_df = filtered_df[
-        filtered_df["revenue"].between(
-            revenue_range[0],
-            revenue_range[1]
-        )
-    ]
-
-    # Runtime Filter
-    filtered_df = filtered_df[
-        filtered_df["runtime"].between(
-            runtime_range[0],
-            runtime_range[1]
-        )
-    ]
-
-    # Rating Filter
-    filtered_df = filtered_df[
-        filtered_df["vote_average"].between(
-            rating_range[0],
-            rating_range[1]
-        )
-    ]
-
-    # Success Filter
-    if success_filter == "Successful":
-        filtered_df = filtered_df[
-            filtered_df["success"] == 1
-        ]
-
-    elif success_filter == "Not Successful":
-        filtered_df = filtered_df[
-            filtered_df["success"] == 0
-        ]
-
-    # Movie Search
-    movie_search = st.text_input(
-        "🎬 Search Movie"
-    )
-    if movie_search:
-        filtered_df = filtered_df[
-            filtered_df["title"].str.contains(
-                movie_search,
-                case=False,
-                na=False
+            filtered_df["budget"].between(
+                budget_range[0],
+                budget_range[1]
             )
         ]
-            
-    genre_df = df.copy()
-    # Budget Filter
-    genre_df = genre_df[
-        genre_df["budget"].between(
-            budget_range[0],
-            budget_range[1]
-        )
-    ]
 
-    # Revenue Filter
-    genre_df = genre_df[
-        genre_df["revenue"].between(
-            revenue_range[0],
-            revenue_range[1]
-        )
-    ]
-
-    # Runtime Filter
-    genre_df = genre_df[
-        genre_df["runtime"].between(
-            runtime_range[0],
-            runtime_range[1]
-        )
-    ]
-
-    # Rating Filter
-    genre_df = genre_df[
-        genre_df["vote_average"].between(
-            rating_range[0],
-            rating_range[1]
-        )
-    ]
-
-    # Success Filter
-    if success_filter == "Successful":
-        genre_df = genre_df[
-            genre_df["success"] == 1
-        ]
-
-    elif success_filter == "Not Successful":
-        genre_df = genre_df[
-            genre_df["success"] == 0
-        ]
-
-    # Movie Search
-    movie_search = st.text_input(
-        "🎬 Search Movie"
-    )
-    if movie_search:
-        genre_df = genre_df[
-            genre_df["title"].str.contains(
-                movie_search,
-                case=False,
-                na=False
+        # Revenue Filter
+        filtered_df = filtered_df[
+            filtered_df["revenue"].between(
+                revenue_range[0],
+                revenue_range[1]
             )
         ]
+
+        # Runtime Filter
+        filtered_df = filtered_df[
+            filtered_df["runtime"].between(
+                runtime_range[0],
+                runtime_range[1]
+            )
+        ]
+
+        # Rating Filter
+        filtered_df = filtered_df[
+            filtered_df["vote_average"].between(
+                rating_range[0],
+                rating_range[1]
+            )
+        ]
+
+        # Success Filter
+        if success_filter == "Successful":
+            filtered_df = filtered_df[
+                filtered_df["success"] == 1
+            ]
+
+        elif success_filter == "Not Successful":
+            filtered_df = filtered_df[
+                filtered_df["success"] == 0
+            ]
+
+        # Movie Search
+        movie_search = st.text_input(
+            "🎬 Search Movie"
+        )
+        if movie_search:
+            filtered_df = filtered_df[
+                filtered_df["title"].str.contains(
+                    movie_search,
+                    case=False,
+                    na=False
+                )
+            ]
+                
+        genre_df = df.copy()
+        # Budget Filter
+        genre_df = genre_df[
+            genre_df["budget"].between(
+                budget_range[0],
+                budget_range[1]
+            )
+        ]
+
+        # Revenue Filter
+        genre_df = genre_df[
+            genre_df["revenue"].between(
+                revenue_range[0],
+                revenue_range[1]
+            )
+        ]
+
+        # Runtime Filter
+        genre_df = genre_df[
+            genre_df["runtime"].between(
+                runtime_range[0],
+                runtime_range[1]
+            )
+        ]
+
+        # Rating Filter
+        genre_df = genre_df[
+            genre_df["vote_average"].between(
+                rating_range[0],
+                rating_range[1]
+            )
+        ]
+
+        # Success Filter
+        if success_filter == "Successful":
+            genre_df = genre_df[
+                genre_df["success"] == 1
+            ]
+
+        elif success_filter == "Not Successful":
+            genre_df = genre_df[
+                genre_df["success"] == 0
+            ]
 
 st.divider()
 
