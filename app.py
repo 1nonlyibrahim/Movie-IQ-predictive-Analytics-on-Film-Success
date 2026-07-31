@@ -1344,7 +1344,7 @@ if st.session_state.validation_complete:
 
         st.caption("Analyze the financial performance of movies based on revenue, budget, profit and return on investment.")
 
-        financial_df = df.copy()
+        financial_df = filtered_df.copy()
 
         financial_df["Profit"] = financial_df["revenue"] - financial_df["budget"]
 
@@ -1526,7 +1526,7 @@ if st.session_state.validation_complete:
             "Explore audience reception, popularity trends and their relationship with revenue."
         )
 
-        analysis_df = df.copy()
+        analysis_df = filtered_df.copy()
 
         # =====================================================
         # Rating Distribution
@@ -1708,7 +1708,7 @@ if st.session_state.validation_complete:
             "Analyze relationships between numerical variables to identify strong positive and negative correlations."
         )
 
-        corr_df = df.copy()
+        corr_df = filtered_df.copy()
 
         numeric_df = corr_df.select_dtypes(include="number")
 
@@ -1804,7 +1804,7 @@ if st.session_state.validation_complete:
             "Perform statistical hypothesis tests to identify significant relationships in the dataset."
         )
 
-        stats_df = df.copy()
+        stats_df = filtered_df.copy()
 
         # ------------------------------------------------------
         # Define Success
@@ -1925,7 +1925,7 @@ if st.session_state.validation_complete:
             "Train a Random Forest model to classify whether a movie is successful."
         )
 
-        ml_df = df.copy()
+        ml_df = filtered_df.copy()
 
         # ------------------------------------------------------
         # Target Variable
@@ -2117,7 +2117,7 @@ if st.session_state.validation_complete:
             "Automatically generated insights based on the analyzed movie dataset."
         )
 
-        insight_df = df.copy()
+        insight_df = filtered_df.copy()
 
         # ---------------------------------------------------------
         # Pre-processing
@@ -2304,7 +2304,7 @@ if st.session_state.validation_complete:
             "Actionable recommendations generated from the analysis to improve future movie performance."
         )
 
-        recommendation_df = df.copy()
+        recommendation_df = filtered_df.copy()
 
         recommendation_df["Profit"] = (
             recommendation_df["revenue"] -
