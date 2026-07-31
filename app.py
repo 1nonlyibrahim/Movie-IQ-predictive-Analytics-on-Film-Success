@@ -571,77 +571,78 @@ st.divider()
 #===============================================================================================================================================================================================================================
 #Analysis filters 
 #===============================================================================================================================================================================================================================
-with st.popover("🔍 Analysis Filters"):
-    st.subheader("🔍 Analysis Filters")
+if st.session_state.validation_complete:
+    with st.expander("🔍 Analysis Filters", expanded=False):
+        st.subheader("🔍 Analysis Filters")
 
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
-    with col1:
-        selected_genres = st.multiselect(
-            "🎭 Genre",
-            sorted(df["genres"].dropna().unique())
-        )
+        with col1:
+            selected_genres = st.multiselect(
+                "🎭 Genre",
+                sorted(df["genres"].dropna().unique())
+            )
 
-    with col2:
-        budget_range = st.slider(
-            "💰 Budget",
-            float(df["budget"].min()),
-            float(df["budget"].max()),
-            (
+        with col2:
+            budget_range = st.slider(
+                "💰 Budget",
                 float(df["budget"].min()),
-                float(df["budget"].max())
+                float(df["budget"].max()),
+                (
+                    float(df["budget"].min()),
+                    float(df["budget"].max())
+                )
             )
-        )
 
-    with col3:
-        revenue_range = st.slider(
-            "📈 Revenue",
-            float(df["revenue"].min()),
-            float(df["revenue"].max()),
-            (
+        with col3:
+            revenue_range = st.slider(
+                "📈 Revenue",
                 float(df["revenue"].min()),
-                float(df["revenue"].max())
+                float(df["revenue"].max()),
+                (
+                    float(df["revenue"].min()),
+                    float(df["revenue"].max())
+                )
             )
-        )
 
-    col4, col5, col6 = st.columns(3)
+        col4, col5, col6 = st.columns(3)
 
-    with col4:
-        runtime_range = st.slider(
-            "⏱ Runtime",
-            int(df["runtime"].min()),
-            int(df["runtime"].max()),
-            (
+        with col4:
+            runtime_range = st.slider(
+                "⏱ Runtime",
                 int(df["runtime"].min()),
-                int(df["runtime"].max())
+                int(df["runtime"].max()),
+                (
+                    int(df["runtime"].min()),
+                    int(df["runtime"].max())
+                )
             )
-        )
 
-    with col5:
-        rating_range = st.slider(
-            "⭐ Vote Average",
-            float(df["vote_average"].min()),
-            float(df["vote_average"].max()),
-            (
+        with col5:
+            rating_range = st.slider(
+                "⭐ Vote Average",
                 float(df["vote_average"].min()),
-                float(df["vote_average"].max())
+                float(df["vote_average"].max()),
+                (
+                    float(df["vote_average"].min()),
+                    float(df["vote_average"].max())
+                )
             )
-        )
 
-    with col6:
-        success_filter = st.selectbox(
-            "✅ Success",
-            [
-                "All",
-                "Successful",
-                "Not Successful"
-            ]
-        )
+        with col6:
+            success_filter = st.selectbox(
+                "✅ Success",
+                [
+                    "All",
+                    "Successful",
+                    "Not Successful"
+                ]
+            )
 
-    movie_search = st.text_input(
-        "🎬 Search Movie"
-    )
-    st.divider()
+        movie_search = st.text_input(
+            "🎬 Search Movie"
+        )
+st.divider()
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
 #==========================================================================================================================================================================================
@@ -779,7 +780,7 @@ if st.session_state.validation_complete:
             f"**Success Column :** {'Yes' if 'success' in df.columns else 'No'}"
         )
 
-    st.divider()
+    st.sidebar.divider()
 
     st.sidebar.link_button(
     "💻 View Source Code on GitHub",
