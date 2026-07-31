@@ -566,6 +566,7 @@ div.stButton > button {
         type="primary"
     ):
         prediction_window()
+
 st.divider()
 
 #===============================================================================================================================================================================================================================
@@ -603,7 +604,7 @@ if st.session_state.validation_complete:
                     float(df["revenue"].min()),
                     float(df["revenue"].max())
                 )
-            )
+        )
 
         col4, col5, col6 = st.columns(3)
 
@@ -616,7 +617,7 @@ if st.session_state.validation_complete:
                     int(df["runtime"].min()),
                     int(df["runtime"].max())
                 )
-            )
+        )
 
         with col5:
             rating_range = st.slider(
@@ -639,10 +640,128 @@ if st.session_state.validation_complete:
                 ]
             )
 
-        movie_search = st.text_input(
-            "🎬 Search Movie"
+    filtered_df = df.copy()
+    # Genre Filter
+    if selected_genres:
+        filtered_df = filtered_df[
+            filtered_df["genres"].isin(selected_genres)
+        ]
+
+    # Budget Filter
+    filtered_df = filtered_df[
+        filtered_df["budget"].between(
+            budget_range[0],
+            budget_range[1]
         )
+    ]
+
+    # Revenue Filter
+    filtered_df = filtered_df[
+        filtered_df["revenue"].between(
+            revenue_range[0],
+            revenue_range[1]
+        )
+    ]
+
+    # Runtime Filter
+    filtered_df = filtered_df[
+        filtered_df["runtime"].between(
+            runtime_range[0],
+            runtime_range[1]
+        )
+    ]
+
+    # Rating Filter
+    filtered_df = filtered_df[
+        filtered_df["vote_average"].between(
+            rating_range[0],
+            rating_range[1]
+        )
+    ]
+
+    # Success Filter
+    if success_filter == "Successful":
+        filtered_df = filtered_df[
+            filtered_df["success"] == 1
+        ]
+
+    elif success_filter == "Not Successful":
+        filtered_df = filtered_df[
+            filtered_df["success"] == 0
+        ]
+
+    # Movie Search
+    movie_search = st.text_input(
+        "🎬 Search Movie"
+    )
+    if movie_search:
+        filtered_df = filtered_df[
+            filtered_df["title"].str.contains(
+                movie_search,
+                case=False,
+                na=False
+            )
+        ]
+            
+    genre_df = df.copy()
+    # Budget Filter
+    genre_df = genre_df[
+        genre_df["budget"].between(
+            budget_range[0],
+            budget_range[1]
+        )
+    ]
+
+    # Revenue Filter
+    genre_df = genre_df[
+        genre_df["revenue"].between(
+            revenue_range[0],
+            revenue_range[1]
+        )
+    ]
+
+    # Runtime Filter
+    genre_df = genre_df[
+        genre_df["runtime"].between(
+            runtime_range[0],
+            runtime_range[1]
+        )
+    ]
+
+    # Rating Filter
+    genre_df = genre_df[
+        genre_df["vote_average"].between(
+            rating_range[0],
+            rating_range[1]
+        )
+    ]
+
+    # Success Filter
+    if success_filter == "Successful":
+        genre_df = genre_df[
+            genre_df["success"] == 1
+        ]
+
+    elif success_filter == "Not Successful":
+        genre_df = genre_df[
+            genre_df["success"] == 0
+        ]
+
+    # Movie Search
+    movie_search = st.text_input(
+        "🎬 Search Movie"
+    )
+    if movie_search:
+        genre_df = genre_df[
+            genre_df["title"].str.contains(
+                movie_search,
+                case=False,
+                na=False
+            )
+        ]
+
 st.divider()
+
 #==========================================================================================================================================================================================
 #sidebar to show dataset information and statistics
 #==========================================================================================================================================================================================
@@ -828,28 +947,30 @@ if st.session_state.validation_complete:
 
         st.markdown("## 📊 Executive Overview")
 
-        # ---------- Calculate KPIs ----------
+       # ---------- Calculate KPIs ----------
 
-        total_movies = len(df)
+        total_movies = len(filtered_df)
 
-        total_revenue = df["revenue"].sum()
+        total_revenue = filtered_df["revenue"].sum()
 
-        total_budget = df["budget"].sum()
+        total_budget = filtered_df["budget"].sum()
 
-        avg_rating = df["vote_average"].mean()
+        avg_rating = filtered_df["vote_average"].mean()
 
-        avg_popularity = df["popularity"].mean()
+        avg_popularity = filtered_df["popularity"].mean()
 
-        avg_runtime = df["runtime"].mean()
+        avg_runtime = filtered_df["runtime"].mean()
 
-        if "success" in df.columns:
-            success_rate = df["success"].mean() * 100
+        if "success" in filtered_df.columns:
+            success_rate = filtered_df["success"].mean() * 100
         else:
-            success_rate = ((df["revenue"] > df["budget"]).mean()) * 100
+            success_rate = (
+                (filtered_df["revenue"] > filtered_df["budget"]).mean()
+            ) * 100
 
         # Handle multiple genres separated by |
         genre_series = (
-            df["genres"]
+            filtered_df["genres"]
             .fillna("Unknown")
             .astype(str)
             .str.split("|")
@@ -948,7 +1069,7 @@ if st.session_state.validation_complete:
 
             with col1:
 
-                plot_df = df.copy()
+                plot_df = filtered_df.copy()
 
                 if column in ["budget", "revenue"]:
                     plot_df[column] = plot_df[column] / 1e7
@@ -1003,32 +1124,32 @@ if st.session_state.validation_complete:
             # ---------------- Quick Summary ---------------- #
 
             if column in ["budget", "revenue"]:
-                avg = format_currency_indian(df[column].mean())
-                median = format_currency_indian(df[column].median())
-                minimum = format_currency_indian(df[column].min())
-                maximum = format_currency_indian(df[column].max())
-                std = format_currency_indian(df[column].std())
+                avg = format_currency_indian(filtered_df[column].mean())
+                median = format_currency_indian(filtered_df[column].median())
+                minimum = format_currency_indian(filtered_df[column].min())
+                maximum = format_currency_indian(filtered_df[column].max())
+                std = format_currency_indian(filtered_df[column].std())
 
             elif column == "runtime":
-                avg = f"{df[column].mean():.1f} min"
-                median = f"{df[column].median():.1f} min"
-                minimum = f"{df[column].min():.1f} min"
-                maximum = f"{df[column].max():.1f} min"
-                std = f"{df[column].std():.1f} min"
+                avg = f"{filtered_df[column].mean():.1f} min"
+                median = f"{filtered_df[column].median():.1f} min"
+                minimum = f"{filtered_df[column].min():.1f} min"
+                maximum = f"{filtered_df[column].max():.1f} min"
+                std = f"{filtered_df[column].std():.1f} min"
 
             elif column == "vote_average":
-                avg = f"{df[column].mean():.2f}/10"
-                median = f"{df[column].median():.2f}/10"
-                minimum = f"{df[column].min():.2f}/10"
-                maximum = f"{df[column].max():.2f}/10"
-                std = f"{df[column].std():.2f}"
+                avg = f"{filtered_df[column].mean():.2f}/10"
+                median = f"{filtered_df[column].median():.2f}/10"
+                minimum = f"{filtered_df[column].min():.2f}/10"
+                maximum = f"{filtered_df[column].max():.2f}/10"
+                std = f"{filtered_df[column].std():.2f}"
 
             else:   # popularity and any other numeric columns
-                avg = f"{df[column].mean():,.2f}"
-                median = f"{df[column].median():,.2f}"
-                minimum = f"{df[column].min():,.2f}"
-                maximum = f"{df[column].max():,.2f}"
-                std = f"{df[column].std():,.2f}"
+                avg = f"{filtered_df[column].mean():,.2f}"
+                median = f"{filtered_df[column].median():,.2f}"
+                minimum = f"{filtered_df[column].min():,.2f}"
+                maximum = f"{filtered_df[column].max():,.2f}"
+                std = f"{filtered_df[column].std():,.2f}"
 
             st.info(    
                 f"""
