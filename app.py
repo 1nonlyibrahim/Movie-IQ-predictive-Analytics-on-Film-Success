@@ -559,7 +559,7 @@ div.stButton > button {
     border-radius: 15px !important;
 }
 </style>""", unsafe_allow_html=True)
-    st.markdown('<div class="mspbutton">', unsafe_allow_html=True)
+    st.markdown('<div class="mspbutton  ">', unsafe_allow_html=True)
     if st.button(
         "🎬 Movie Success Predictor",
         use_container_width=True,   
@@ -704,6 +704,12 @@ if st.session_state.validation_complete:
         st.write(
             f"**Success Column :** {'Yes' if 'success' in df.columns else 'No'}"
         )
+
+    st.sidebar.link_button(
+    "💻 View Source Code on GitHub",
+    "https://github.com/1nonlyibrahim/Movie-IQ-predictive-Analytics-on-Film-Success/blob/d90ceae95fa143d406ccf416b7b2c8d8e0d0c899/app.py",
+    use_container_width=True
+    )
 
 if st.session_state.validation_complete:
 
